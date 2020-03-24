@@ -29,3 +29,8 @@ for filename in os.listdir(directory):
         with open(directory+outputFileName+'.csv', 'w') as f:
             for key in my_dict.keys():
                 f.write("%s,%s\n"%(key,my_dict[key]))
+                
+    if round((filesProcessed/directorySize)*100, 1) > progress:
+        progress += 1
+        print("Processing...", round((filesProcessed/directorySize)*100, 1), " %")
+    filesProcessed += 1
