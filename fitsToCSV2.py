@@ -1,7 +1,3 @@
-# Python program to convert a FITS file
-# to a CSV you can open in Excel
-# written by Erin for Jim! 
-
 import numpy
 import os
 import csv
