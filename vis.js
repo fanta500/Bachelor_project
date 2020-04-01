@@ -1,3 +1,3 @@
-import KeplerVis from './kepler';
+import KeplerVis from kepler.js;
 
 KeplerVis()

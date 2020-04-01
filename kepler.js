@@ -1,4 +1,4 @@
-import pv from '..';
+import pv from pv.js;
 
 export default function() {
   let config = {
@@ -6,7 +6,7 @@ export default function() {
     viewport: [800, 600]
   }
   
-  let view = [{
+  let views = [{
     id: 'v1', width: 800, height: 600,
         padding: {left: 100, right: 10, top: 20, bottom: 50},
         offset: [0, 0],
@@ -14,9 +14,9 @@ export default function() {
         legend: false
   }]
   
-  let app = pv(config).view(view);
+  let app = pv(config).view(views);
   
-  p.input({
+  app.input({
     source: 'flights.csv',
     method: 'file',
     batchSize: 500000,
@@ -24,7 +24,7 @@ export default function() {
     delimiter: ','
   });
   
-  p.batch([
+  app.batch([
     {
       match: {
         distance: [0, 15000],
@@ -39,7 +39,7 @@ export default function() {
     }
   ]);
   
-  p.progress([
+  app.progress([
     {
       visualize: {
         id: 'v1',
@@ -51,5 +51,5 @@ export default function() {
     }
   ]);
   
-  p.execute({mode: 'automatic'})
+  app.execute({mode: 'automatic'})
 }
