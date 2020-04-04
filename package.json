@@ -1,0 +1,28 @@
+{
+  "name": "Bachelor_project",
+  "version": "1.0.0",
+  "description": "We will be making progressive visualisations of MAST data from the Kepler Space Mission. Akin to a sky map.",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fanta500/Bachelor_project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fanta500/Bachelor_project/issues"
+  },
+  "homepage": "https://github.com/fanta500/Bachelor_project#readme",
+  "devDependencies": {
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  },
+  "dependencies": {
+    "lodash": "^4.17.15"
+  }
+}
