@@ -1,12 +1,13 @@
 import _ from 'lodash';
-import P4 from './kepler';
+import keplerVis from './kepler';
 
 function component() {
-    const element = document.createElement('div');
+    //const element = document.createElement('div');
   
-    element.innerHTML = _.join(['Hello', 'webpack'], ' ');
+    //element.innerHTML = _.join(['Hello', 'webpack'], ' ');
     
-    return element;
+    //return element;
+    keplerVis()
   }
   
   document.body.appendChild(component());
