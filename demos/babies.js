@@ -1,94 +1,120 @@
 import pv from '..';
-import {dsvFormat} from 'd3-dsv';
 
 export default function() {
   let config = {
     container: "pv-vis",
-    viewport: [800, 600]
+    viewport: [1000, 1000],
+    profiling: true
   }
-
-  let views = [{
-    id: 'v1', width: 800, height: 600,
-        padding: {left: 100, right: 10, top: 20, bottom: 50},
-        offset: [0, 0],
-        gridlines: {y: true},
-        legend: false
-  }]
   
-  let app = pv(config).view(views);
-  fetch("http://localhost:5501/demos/flights.csv").then(response => response.text())
-  .then(text => dsvFormat(',').parse(text))
-  .then(d => {
-    console.log(d);
-    run(d)
-  });
+  let views = [
+    {
+      id: 'chart2', width: 800, height: 300,
+      padding: {left: 80, right: 10, top: 20, bottom: 50},
+      offset: [50, 0],
+      gridlines: {y: true},
+      legend: false
+    },
+    {
+      id: 'map_id', offset: [50,350],
+      padding: {left: 80, right: 10, top: 20, bottom: 50},
+      width: 800, height: 650,
+    }
+  ]
 
-  function run(jsonData) {
-    app.input({
-      values: jsonData,
-      batchSize: 5000,
-      format: 'json',
-      delimiter: ',',
-      schema: {
-        from_airport: "string",
-        from_city: "string",
-        from_country: "string",
-        from_long: "float",
-        from_lat: "float",
-        to_airport: "string",
-        to_city: "string",
-        to_country: "string",
-        to_long: "float",
-        to_lat: "float",
-        airline: "string",
-        airline_country: "string",
-        distance: "int"
-      }
-    
-    }).batch([
-      {
-        match: {
-          distance: [0, 15000],
-          airline: {$in: ['Aerocondor', 'Air Burkina', 'Yuzhmashavia']}
-        },
-        aggregate: {
-          $group: ['distance', 'airline'],
-          $collect: {
-            flights: {$count: '*'}
-          }
-        }
-      }
-    ]).progress([
-      {
-        visualize: {
-          id: 'v1',
-          mark: 'rect',
-          x: 'airline',
-          y: 'distance',
+  let app = pv(config).view(views).input({
+    method: 'memory',
+    source: function(nrows) {
+      let dataset = pv.datasets.Kepler({size: nrows, type: 'array'});
+      let data = dataset.data;
+      return data;
+    },
+    batchSize: 10,
+    schema: pv.datasets.Kepler.schema
+  }).batch([
+    {
+      aggregate: {
+        $group: 'ApparentMagnitude',
+        $collect: {count: {$count: '*'}},
+      },
+      out: 'magnitude'
+    },
+    {
+      match: {
+        RightAscension: [279.62749, 301.82369],
+        Decline: [36.55995, 52.47462]
+      },
+      aggregate: {
+        $bin: [{RightAscension: 256}, {Decline: 256}],
+        $collect: {values: {$count: '*'}}
+      },
+      out: 'map'
+    }
+  ]).progress([
+    {
+      visualize: [
+        {
+          id: 'chart2',
+          in: 'magnitude',
+          mark: 'area',
+          x: 'ApparentMagnitude',
+          y: 'count',
+          zero: true,
           color: 'teal'
+        },
+        {
+          id: 'map_id',
+          in: 'map',
+          mark: 'circle', color: 'black',
+          size: 1,
+          x: 'RightAscension', y: 'Decline',
         }
-      }
-    ])
-  
-    document.getElementById('next-button').onclick = () => {
-      try {
-        app.next();
-      }
-      catch(e) {
-        console.log(e);
-      }
+      ]
+    }
+  ])
+  // .interact(
+  //   {
+  //     event: 'brush', 
+  //     from: 'map_id', 
+  //     response: {
+  //       chart2: {
+  //         selected: {color: 'orange'}
+  //       }
+  //     }
+  //   }
+  // )
+  .onEach(function(stats, profile) {
+    document.getElementById('stats').innerHTML = '(completed: ' + stats.completed + ')';
+  })
+
+  document.getElementById('next-button').onclick = () => {
+    try {
+      app.next();
+    }
+    catch(e) {
+      console.log(e);
     }
   }
-  
-
-  document.getElementById('pv-demo-description').innerHTML = `
-  <h3>PV Demo </h3>
-  <p>
-    This demo uses sythnetic data to show how PV can be used to create a progressive visualization application with mulitple linked views and interactions.
-  </p>
-  <p>
-    Press "progress" butoon to incrementally process and visualize data. "Brush-and-link" interaction can be used on the area chart at the bottom to highlight data at the two bar charts above.
-    The incremental data processing, visualizations, and interactions are accelerated using the GPU.
-  </p>
-  `;
+  document.getElementById('start-button').onclick = () => {
+    try {
+      app.start();
+    }
+    catch(e) {
+      console.log(e);
+    }
+  }
 }
+
+
+document.getElementById('pv-demo-description').innerHTML = `
+<h3>Kepler Demo </h3>
+<p>
+  This demo uses sythnetic data to show how PV can be used to create a progressive visualization application with mulitple linked views and interactions.
+</p>
+<p>
+  Press "progress" butoon to incrementally process and visualize data. "Brush-and-link" interaction can be used.
+  The incremental data processing, visualizations, and interactions are accelerated using the GPU.
+</p>
+`;
+    
+
