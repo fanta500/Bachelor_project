@@ -1,3 +1,3 @@
-import BabyModel from './babies';
+import Kepler from './kepler';
 
-BabyModel();
+Kepler();
