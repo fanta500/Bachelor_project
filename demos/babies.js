@@ -27,9 +27,11 @@ export default function() {
     source: function(nrows) {
       let dataset = pv.datasets.Kepler({size: nrows, type: 'array'});
       let data = dataset.data;
+      console.log(data)
+      console.log(dataset.schema)
       return data;
     },
-    batchSize: 10,
+    batchSize: 500,
     schema: pv.datasets.Kepler.schema
   }).batch([
     {
@@ -37,25 +39,22 @@ export default function() {
         $group: 'ApparentMagnitude',
         $collect: {count: {$count: '*'}},
       },
-      out: 'magnitude'
+      out: 'byMagnitude'
     },
     {
-      match: {
-        RightAscension: [279.62749, 301.82369],
-        Decline: [36.55995, 52.47462]
-      },
       aggregate: {
-        $bin: [{RightAscension: 256}, {Decline: 256}],
-        $collect: {values: {$count: '*'}}
+        $group: ['RightAscension', 'Decline'],
+        $collect: {
+          coordinates: {$var: 'coordinate'}}
       },
       out: 'map'
-    }
+    },
   ]).progress([
     {
       visualize: [
         {
           id: 'chart2',
-          in: 'magnitude',
+          in: 'byMagnitude',
           mark: 'area',
           x: 'ApparentMagnitude',
           y: 'count',
@@ -66,13 +65,12 @@ export default function() {
           id: 'map_id',
           in: 'map',
           mark: 'circle', color: 'black',
-          size: 1,
           x: 'RightAscension', y: 'Decline',
         }
       ]
     }
   ])
-  // .interact(
+  // .interact([
   //   {
   //     event: 'brush', 
   //     from: 'map_id', 
@@ -82,7 +80,7 @@ export default function() {
   //       }
   //     }
   //   }
-  // )
+  // ])
   .onEach(function(stats, profile) {
     document.getElementById('stats').innerHTML = '(completed: ' + stats.completed + ')';
   })
