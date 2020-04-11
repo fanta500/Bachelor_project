@@ -3,7 +3,7 @@ import pv from '..';
 export default function() {
   let config = {
     container: "pv-vis",
-    viewport: [1000, 1000],
+    viewport: [2000, 2000],
     profiling: true
   }
   
@@ -23,7 +23,7 @@ export default function() {
     {
       id: 'map_aggr', offset: [475,350],
       padding: {left: 80, right: 10, top: 20, bottom: 50},
-      width: 400, height: 400,
+      width: 1000, height: 1000,
     }
   ]
 
@@ -32,8 +32,6 @@ export default function() {
     source: function(nrows) {
       let dataset = pv.datasets.Kepler({size: nrows, type: 'array'});
       let data = dataset.data;
-      console.log(data)
-      console.log(dataset.schema)
       return data;
     },
     batchSize: 500,
@@ -88,7 +86,7 @@ export default function() {
         mark: 'circle',
         color: {
           field: 'values',
-          exponent: '1.15'
+          exponent: '0.25'
         },
         x: 'RightAscension', 
         y: 'Decline',
@@ -98,9 +96,9 @@ export default function() {
   // .interact([
   //   {
   //     event: 'brush', 
-  //     from: 'map_id', 
+  //     from: 'map_aggr', 
   //     response: {
-  //       chart2: {
+  //       chart1: {
   //         selected: {color: 'orange'}
   //       }
   //     }
