@@ -1,4 +1,5 @@
 import pv from '..';
+import Kepler from './data-kepler';
 
 export default function() {
   let config = {
@@ -30,12 +31,12 @@ export default function() {
   let app = pv(config).view(views).input({
     method: 'memory',
     source: function(nrows) {
-      let dataset = pv.datasets.Kepler({size: nrows, type: 'array'});
+      let dataset = Kepler({size: nrows, type: 'array'});
       let data = dataset.data;
       return data;
     },
     batchSize: 500,
-    schema: pv.datasets.Kepler.schema
+    schema: Kepler.schema
   }).batch([
     {
       aggregate: {
