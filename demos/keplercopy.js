@@ -18,7 +18,12 @@ export default function() {
     {
       id: 'map_id', offset: [50,350],
       padding: {left: 80, right: 10, top: 20, bottom: 50},
-      width: 800, height: 650,
+      width: 400, height: 400,
+    },
+    {
+      id: 'map_aggr', offset: [475,350],
+      padding: {left: 80, right: 10, top: 20, bottom: 50},
+      width: 400, height: 400,
     }
   ]
 
@@ -31,7 +36,7 @@ export default function() {
       console.log(dataset.schema)
       return data;
     },
-    batchSize: 10,
+    batchSize: 500,
     schema: pv.datasets.Kepler.schema
   }).batch([
     {
@@ -43,34 +48,64 @@ export default function() {
     },
     {
       match: {
+        GroundLongtitude: [65, 85],
+        GroundLatitude: [5, 25]
+      },
+      aggregate: {
+        $bin: [{GroundLatitude: 128}, {GroundLongtitude: 128}],
+        $collect: {
+          values: {$count: '*'}
+        },
+      },
+      out: 'map'
+    },
+    {
+      match: {
         RightAscension: [279.62749, 301.82369],
         Decline: [36.55995, 52.47462]
       },
       aggregate: {
-        $bin: [{RightAscension: 10}, {Decline: 10}],
-        $collect: {values: {$count: '*'}}
+        $bin: [{RightAscension: 128}, {Decline: 128}],
+        $collect: {
+          values: {$count: '*'}
+        },
       },
-      out: 'map'
+      out: 'map_aggr'
     }
   ]).progress([
     {
-      visualize: [
-        {
-          id: 'chart2',
-          in: 'byMagnitude',
-          mark: 'area',
-          x: 'ApparentMagnitude',
-          y: 'count',
-          zero: true,
-          color: 'teal'
+      visualize: {
+        id: 'chart2',
+        in: 'byMagnitude',
+        mark: 'area',
+        x: 'ApparentMagnitude',
+        y: 'count',
+        zero: true,
+        color: 'teal'
+      }
+    },
+    {
+      visualize: {
+        id: 'map_id',
+        mark: 'circle',
+        color: 'red',
+        opacity: 0.35,
+        x: 'GroundLongtitude',
+        y: 'GroundLatitude',
+      }
+    },
+    {
+      visualize: {
+        id: 'map_aggr',
+        in: 'map_aggr',
+        mark: 'circle',
+        color: {
+          field: 'values',
+          exponent: '1.15'
         },
-        {
-          id: 'map_id',
-          in: 'map',
-          mark: 'rect', color: 'black',
-          x: 'RightAscension', y: 'Decline',
-        }
-      ]
+        x: 'RightAscension', 
+        y: 'Decline',
+      }
     }
   ])
   // .interact([
