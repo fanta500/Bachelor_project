@@ -3,7 +3,7 @@ import pv from '..';
 export default function() {
   let config = {
     container: "pv-vis",
-    viewport: [2000, 2000],
+    viewport: [2000, 1000],
     profiling: true
   }
   
@@ -18,12 +18,12 @@ export default function() {
     {
       id: 'map_id', offset: [50,350],
       padding: {left: 80, right: 10, top: 20, bottom: 50},
-      width: 400, height: 400,
+      width: 800, height: 450,
     },
     {
-      id: 'map_aggr', offset: [475,350],
+      id: 'map_aggr', offset: [900,350],
       padding: {left: 80, right: 10, top: 20, bottom: 50},
-      width: 1000, height: 1000,
+      width: 800, height: 450,
     }
   ]
 
@@ -84,6 +84,7 @@ export default function() {
         id: 'map_aggr',
         in: 'map',
         mark: 'circle',
+        //size: '100',
         color: {
           field: 'values',
           exponent: '0.25'
@@ -96,9 +97,9 @@ export default function() {
   // .interact([
   //   {
   //     event: 'brush', 
-  //     from: 'map_aggr', 
+  //     from: 'chart1', 
   //     response: {
-  //       chart1: {
+  //       map_aggr: {
   //         selected: {color: 'orange'}
   //       }
   //     }
