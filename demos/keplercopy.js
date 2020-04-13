@@ -1,43 +1,42 @@
 import pv from '..';
+import Kepler from './data-kepler';
 
 export default function() {
   let config = {
     container: "pv-vis",
-    viewport: [1000, 1000],
+    viewport: [2000, 2000],
     profiling: true
   }
   
   let views = [
     {
-      id: 'chart2', width: 800, height: 300,
+      id: 'chart1', width: 800, height: 300,
       padding: {left: 80, right: 10, top: 20, bottom: 50},
       offset: [50, 0],
       gridlines: {y: true},
       legend: false
     },
     {
-      id: 'map_id', offset: [50,350],
+      id: 'map_tight', offset: [50,350],
       padding: {left: 80, right: 10, top: 20, bottom: 50},
-      width: 400, height: 400,
+      width: 800, height: 450,
     },
     {
-      id: 'map_aggr', offset: [475,350],
+      id: 'map_loose', offset: [50,850],
       padding: {left: 80, right: 10, top: 20, bottom: 50},
-      width: 400, height: 400,
+      width: 800, height: 450,
     }
   ]
 
   let app = pv(config).view(views).input({
     method: 'memory',
-    source: function(nrows) {
-      let dataset = pv.datasets.Kepler({size: nrows, type: 'array'});
+    source: function(batchSize) {
+      let dataset = Kepler({size: batchSize, type: 'array'});
       let data = dataset.data;
-      console.log(data)
-      console.log(dataset.schema)
       return data;
     },
-    batchSize: 500,
-    schema: pv.datasets.Kepler.schema
+    batchSize: 5000,
+    schema: Kepler.schema
   }).batch([
     {
       aggregate: {
@@ -48,34 +47,34 @@ export default function() {
     },
     {
       match: {
-        GroundLongtitude: [65, 85],
-        GroundLatitude: [5, 25]
+        RightAscension: [279.62749, 301.82369],
+        Decline: [36.55995, 52.47462]
       },
       aggregate: {
-        $bin: [{GroundLatitude: 128}, {GroundLongtitude: 128}],
+        $bin: [{RightAscension: 1600}, {Decline: 900}],
         $collect: {
           values: {$count: '*'}
         },
       },
-      out: 'map'
-    },
+      out: 'map_tight'
+    },  
     {
       match: {
         RightAscension: [279.62749, 301.82369],
         Decline: [36.55995, 52.47462]
       },
       aggregate: {
-        $bin: [{RightAscension: 128}, {Decline: 128}],
+        $bin: [{RightAscension: 16}, {Decline: 9}],
         $collect: {
           values: {$count: '*'}
         },
       },
-      out: 'map_aggr'
+      out: 'map_loose'
     }
   ]).progress([
     {
       visualize: {
-        id: 'chart2',
+        id: 'chart1',
         in: 'byMagnitude',
         mark: 'area',
         x: 'ApparentMagnitude',
@@ -86,22 +85,25 @@ export default function() {
     },
     {
       visualize: {
-        id: 'map_id',
+        id: 'map_tight',
+        in: 'map_tight',
         mark: 'circle',
-        color: 'red',
-        opacity: 0.35,
-        x: 'GroundLongtitude',
-        y: 'GroundLatitude',
+        color: {
+          field: 'values',
+          exponent: '0.25'
+        },
+        x: 'RightAscension', 
+        y: 'Decline',
       }
     },
     {
       visualize: {
-        id: 'map_aggr',
-        in: 'map_aggr',
+        id: 'map_loose',
+        in: 'map_loose',
         mark: 'circle',
         color: {
           field: 'values',
-          exponent: '1.15'
+          exponent: '0.25'
         },
         x: 'RightAscension', 
         y: 'Decline',
@@ -111,9 +113,9 @@ export default function() {
   // .interact([
   //   {
   //     event: 'brush', 
-  //     from: 'map_id', 
+  //     from: 'chart1', 
   //     response: {
-  //       chart2: {
+  //       map_aggr: {
   //         selected: {color: 'orange'}
   //       }
   //     }
