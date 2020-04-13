@@ -28,15 +28,11 @@ export default function() {
     }
   ]
 
+
   let app = pv(config).view(views).input({
-    method: 'memory',
-    source: function(batchSize) {
-      let dataset = Kepler({size: batchSize, type: 'array'});
-      let data = dataset.data;
-      return data;
-    },
+    method: 'file',
+    source: './MAST_data.csv',
     batchSize: 5000,
-    schema: Kepler.schema
   }).batch([
     {
       aggregate: {
