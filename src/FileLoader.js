@@ -79,6 +79,7 @@ export default class FileLoader {
           let rawText = this.leftOver + evt.target.result
           let lines = rawText.split('\n')
           let schema = this.parseDataSchema(lines.slice(0, 10))
+          console.log('The schema is', schema)
           resolve(schema)
         }
       }
