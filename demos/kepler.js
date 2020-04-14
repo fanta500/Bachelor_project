@@ -119,9 +119,6 @@ export default function() {
     //     }
     //   }
     // ])
-    .onEach(function(stats, profile) {
-      document.getElementById('stats').innerHTML = '(completed: ' + stats.completed + ')';
-    })
   }
   
   document.getElementById('next-button').onclick = () => {
