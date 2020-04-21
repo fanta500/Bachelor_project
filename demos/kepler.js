@@ -110,14 +110,14 @@ export default function() {
     ])
     .interact([
       {
-        event: ['pan','zoom'], 
+        event: ['brush','zoom'], 
         from: 'map_tight', 
         response: {
           map_aggr: {
             selected: {color: 'white'}
           }
         }
-      }
+      },
     ])
   }
   
