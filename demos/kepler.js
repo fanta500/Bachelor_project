@@ -2,30 +2,44 @@ import pv from '..';
 import Kepler from './data-kepler';
 
 export default function() {
+  function disableScroll() { 
+    // Get the current page scroll position 
+    let scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
+    let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft; 
+  
+        // if any scroll is attempted, set this to the previous value 
+        window.onscroll = function() { 
+            window.scrollTo(scrollLeft, scrollTop); 
+        }; 
+} 
+  
+function enableScroll() { 
+    window.onscroll = function() {}; 
+} 
+
+  document.addEventListener("keydown", event => {
+    if (event.keyCode === 16) {
+      disableScroll();
+    }
+  });
+  document.addEventListener("keyup", event => {
+    if (event.keyCode === 16) {
+      enableScroll();
+    }
+  });
+
   let config = {
     container: "pv-vis",
-    viewport: [1000, 700],
+    viewport: [2000, 4000],
     profiling: true
   }
   
   let views = [
-    // {
-    //   id: 'chart1', width: 800, height: 300,
-    //   padding: {left: 80, right: 10, top: 20, bottom: 50},
-    //   offset: [50, 0],
-    //   gridlines: {y: true},
-    //   legend: false
-    // },
     {
       id: 'map_tight', offset: [50,0],
       padding: {left: 80, right: 10, top: 20, bottom: 50},
-      width: 800, height: 450,
+      width: 800, height: 600,
     },
-    {
-      id: 'map_loose', offset: [50,500],
-      padding: {left: 80, right: 10, top: 20, bottom: 50},
-      width: 800, height: 450,
-    }
   ]
 
   let app = pv(config).view(views)
@@ -56,31 +70,7 @@ export default function() {
         },
         out: 'map_tight'
       },  
-      {
-        match: {
-          s_ra: [279.62749, 301.82369],
-          s_dec: [36.55995, 52.47462]
-        },
-        aggregate: {
-          $bin: [{s_ra: 160}, {s_dec: 90}],
-          $collect: {
-            values: {$count: '*'}
-          },
-        },
-        out: 'map_loose'
-      }
     ]).progress([
-      // {
-      //   visualize: {
-      //     id: 'chart1',
-      //     in: 'byMagnitude',
-      //     mark: 'area',
-      //     x: 'ApparentMagnitude',
-      //     y: 'count',
-      //     zero: true,
-      //     color: 'teal'
-      //   }
-      // },
       {
         visualize: {
           id: 'map_tight',
@@ -94,23 +84,10 @@ export default function() {
           y: 's_dec',
         }
       },
-      {
-        visualize: {
-          id: 'map_loose',
-          in: 'map_loose',
-          mark: 'circle',
-          color: {
-            field: 'values',
-            exponent: '0.25'
-          },
-          x: 's_ra', 
-          y: 's_dec',
-        }
-      }
     ])
     .interact([
       {
-        event: ['brush','zoom'], 
+        event: ['pan','zoom'], 
         from: 'map_tight', 
         response: {
           map_aggr: {
