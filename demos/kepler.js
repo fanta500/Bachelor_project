@@ -2,11 +2,10 @@ import pv from '..';
 import Kepler from './data-kepler';
 
 export default function() {
+  // Get the current page scroll position 
+  let scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
+  let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft; 
   function disableScroll() { 
-    // Get the current page scroll position 
-    let scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
-    let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft; 
-  
         // if any scroll is attempted, set this to the previous value 
         window.onscroll = function() { 
             window.scrollTo(scrollLeft, scrollTop); 
@@ -19,11 +18,13 @@ function enableScroll() {
 
   document.addEventListener("keydown", event => {
     if (event.keyCode === 16) {
+      //keyCode 16 = shift
       disableScroll();
     }
   });
   document.addEventListener("keyup", event => {
     if (event.keyCode === 16) {
+      //keyCode 16 = shift
       enableScroll();
     }
   });
