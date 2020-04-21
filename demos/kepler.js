@@ -4,25 +4,25 @@ import Kepler from './data-kepler';
 export default function() {
   let config = {
     container: "pv-vis",
-    viewport: [2000, 2000],
+    viewport: [1000, 700],
     profiling: true
   }
   
   let views = [
+    // {
+    //   id: 'chart1', width: 800, height: 300,
+    //   padding: {left: 80, right: 10, top: 20, bottom: 50},
+    //   offset: [50, 0],
+    //   gridlines: {y: true},
+    //   legend: false
+    // },
     {
-      id: 'chart1', width: 800, height: 300,
-      padding: {left: 80, right: 10, top: 20, bottom: 50},
-      offset: [50, 0],
-      gridlines: {y: true},
-      legend: false
-    },
-    {
-      id: 'map_tight', offset: [50,350],
+      id: 'map_tight', offset: [50,0],
       padding: {left: 80, right: 10, top: 20, bottom: 50},
       width: 800, height: 450,
     },
     {
-      id: 'map_loose', offset: [50,850],
+      id: 'map_loose', offset: [50,500],
       padding: {left: 80, right: 10, top: 20, bottom: 50},
       width: 800, height: 450,
     }
@@ -33,7 +33,7 @@ export default function() {
   let run = (evt) => {
     app.input({
       source: evt.target.files[0],
-      batchSize: 50000,
+      batchSize: 5000000,
       schema: {
         target_name: 'string',
         s_ra: 'float',
@@ -49,7 +49,7 @@ export default function() {
           s_dec: [36.55995, 52.47462]
         },
         aggregate: {
-          $bin: [{s_ra: 1600}, {s_dec: 900}],
+          $bin: [{s_ra: 3200}, {s_dec: 1800}],
           $collect: {
             values: {$count: '*'}
           },
@@ -62,7 +62,7 @@ export default function() {
           s_dec: [36.55995, 52.47462]
         },
         aggregate: {
-          $bin: [{s_ra: 16}, {s_dec: 9}],
+          $bin: [{s_ra: 160}, {s_dec: 90}],
           $collect: {
             values: {$count: '*'}
           },
@@ -88,7 +88,7 @@ export default function() {
           mark: 'circle',
           color: {
             field: 'values',
-            exponent: '0.25'
+            exponent: '0.001'
           },
           x: 's_ra', 
           y: 's_dec',
@@ -108,17 +108,17 @@ export default function() {
         }
       }
     ])
-    // .interact([
-    //   {
-    //     event: 'brush', 
-    //     from: 'chart1', 
-    //     response: {
-    //       map_aggr: {
-    //         selected: {color: 'orange'}
-    //       }
-    //     }
-    //   }
-    // ])
+    .interact([
+      {
+        event: ['pan','zoom'], 
+        from: 'map_tight', 
+        response: {
+          map_aggr: {
+            selected: {color: 'white'}
+          }
+        }
+      }
+    ])
   }
   
   document.getElementById('next-button').onclick = () => {
