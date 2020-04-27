@@ -1,20 +1,23 @@
 import pv from '..';
-import Kepler from './data-kepler';
+import makeSliders from './double_input_slider'
 
 export default function() {
-  // Get the current page scroll position 
-  let scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
-  let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft; 
+  makeSliders()
+  document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" />`
+
   function disableScroll() { 
+    // Get the current page scroll position 
+    let scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
+    let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft; 
         // if any scroll is attempted, set this to the previous value 
         window.onscroll = function() { 
             window.scrollTo(scrollLeft, scrollTop); 
         }; 
-} 
+  } 
   
-function enableScroll() { 
+  function enableScroll() { 
     window.onscroll = function() {}; 
-} 
+  } 
 
   document.addEventListener("keydown", event => {
     if (event.keyCode === 16) {
@@ -39,16 +42,26 @@ function enableScroll() {
     {
       id: 'map_tight', offset: [50,0],
       padding: {left: 80, right: 10, top: 20, bottom: 50},
-      width: 800, height: 600,
+      width: 1600, height: 900,
     },
+    {
+      id: 'coordinates_chart', offset: [50,950],
+      padding: {left: 80, right: 10, top: 20, bottom: 50},
+      width: 800, height: 600,
+    }
   ]
+
+
+  let ra_range = $( "#ra-slider-range" ).slider( "values" );
+
+  console.log(ra_range)
 
   let app = pv(config).view(views)
 
   let run = (evt) => {
     app.input({
       source: evt.target.files[0],
-      batchSize: 5000000,
+      batchSize: 500000,
       schema: {
         target_name: 'string',
         s_ra: 'float',
@@ -60,29 +73,52 @@ function enableScroll() {
     }).batch([
       {
         match: {
-          s_ra: [279.62749, 301.82369],
-          s_dec: [36.55995, 52.47462]
+          s_ra: [279, 302],
+          s_dec: [36, 53]
         },
         aggregate: {
-          $bin: [{s_ra: 3200}, {s_dec: 1800}],
+          $bin: [{s_ra: 1600}, {s_dec: 900}],
           $collect: {
-            values: {$count: '*'}
+            map_values: {$count: '*'}
           },
         },
         out: 'map_tight'
       },  
+      {
+        match: {
+          s_ra: [279, 302]
+        },
+        aggregate: {
+          $bin: {s_ra: 6},
+          $collect: {
+            chart_values: {$count: '*'},
+            chart_min: {$min: '*'}
+          },
+        },
+        out: 'chart1'
+      }
     ]).progress([
       {
         visualize: {
           id: 'map_tight',
           in: 'map_tight',
-          mark: 'circle',
+          mark: 'rectangle',
           color: {
-            field: 'values',
-            exponent: '0.001'
+            field: 'map_values',
+            exponent: '0.25'
           },
           x: 's_ra', 
           y: 's_dec',
+        }
+      },
+      {
+        visualize: {
+          id: 'coordinates_chart',
+          in: "chart1",
+          mark: 'bar',
+          color: 'steelblue',
+          x: 's_ra', 
+          y: 'chart_values'
         }
       },
     ])
@@ -115,20 +151,8 @@ function enableScroll() {
       console.log(e);
     }
   }
-  document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" />`
 
   document.getElementById('input-file').onchange = run
-
-  document.getElementById('pv-demo-description').innerHTML = `
-  <h3>Kepler Demo </h3>
-  <p>
-    This demo uses sythnetic data to show how PV can be used to create a progressive visualization application with mulitple linked views and interactions.
-  </p>
-  <p>
-    Press "progress" butoon to incrementally process and visualize data. "Brush-and-link" interaction can be used.
-    The incremental data processing, visualizations, and interactions are accelerated using the GPU.
-  </p>
-  `;
 }
 
 
