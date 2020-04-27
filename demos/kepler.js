@@ -2,7 +2,10 @@ import pv from '..';
 import makeSliders from './double_input_slider'
 
 export default function() {
+  //initialize the sliders to control right ascension and decline
   makeSliders()
+
+  //initialize the select file button
   document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" />`
 
   function disableScroll() { 
@@ -51,14 +54,36 @@ export default function() {
     }
   ]
 
+  function calculateBinRatio() {
+    let raMaxRange = $("#ra-slider-range").slider("option", "max") - $("#ra-slider-range").slider("option", "min")
+    let raCurrRange = getRightAscension()[1] - getRightAscension()[0]
+    let raRatio = raCurrRange / raMaxRange
 
-  let ra_range = $( "#ra-slider-range" ).slider( "values" );
+    let decMaxRange = $("#dec-slider-range").slider("option", "max") - $("#dec-slider-range").slider("option", "min")
+    let decCurrRange = getDecline()[1] - getDecline()[0]
+    let decRatio = decCurrRange / decMaxRange
 
-  console.log(ra_range)
+    console.log(raRatio, "    ", decRatio)
+    return [raRatio, decRatio]
+  }
+
+  function getRightAscension() {
+    //This method is invoked when the pipeline is started
+    let ra = [document.getElementById("ra_min").value, document.getElementById("ra_max").value]
+    //console.log(ra)
+    return ra
+  }
+
+  function getDecline() {
+    //This method is invoked when the pipeline is started
+    let dec = [document.getElementById("dec_min").value, document.getElementById("dec_max").value]
+    //console.log(dec)
+    return dec
+  }
 
   let app = pv(config).view(views)
 
-  let run = (evt) => {
+  let confirmData = (evt) => {
     app.input({
       source: evt.target.files[0],
       batchSize: 500000,
@@ -70,14 +95,22 @@ export default function() {
         t_max: 'float',
         t_exptime: 'int'
       }
-    }).batch([
+    });
+  }
+
+  let analyseVisualise = () => {
+    let ra = getRightAscension()
+    let dec = getDecline()
+    let binSize = calculateBinRatio()
+
+    app.batch([
       {
         match: {
-          s_ra: [279, 302],
-          s_dec: [36, 53]
+          s_ra: ra,
+          s_dec: dec
         },
         aggregate: {
-          $bin: [{s_ra: 1600}, {s_dec: 900}],
+          $bin: [{s_ra: binSize[0]*1600}, {s_dec: binSize[1]*900}],
           $collect: {
             map_values: {$count: '*'}
           },
@@ -132,8 +165,10 @@ export default function() {
           }
         }
       },
-    ])
+    ]);
+    
   }
+    
   
   document.getElementById('next-button').onclick = () => {
     try {
@@ -152,7 +187,8 @@ export default function() {
     }
   }
 
-  document.getElementById('input-file').onchange = run
+  document.getElementById('input-file').onchange = confirmData
+  document.getElementById('confirm-data').onclick = analyseVisualise
 }
 
 

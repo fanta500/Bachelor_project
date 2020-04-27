@@ -1,130 +1,143 @@
 import pv from '..';
-import Kepler from './data-kepler';
+import makeSliders from './double_input_slider'
 
 export default function() {
+  //initialize the sliders to control right ascension and decline
+  makeSliders()
+
+  //initialize the select file button
+  document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" />`
+
+  function disableScroll() { 
+    // Get the current page scroll position 
+    let scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
+    let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft; 
+        // if any scroll is attempted, set this to the previous value 
+        window.onscroll = function() { 
+            window.scrollTo(scrollLeft, scrollTop); 
+        }; 
+  } 
+  
+  function enableScroll() { 
+    window.onscroll = function() {}; 
+  } 
+
+  document.addEventListener("keydown", event => {
+    if (event.keyCode === 16) {
+      //keyCode 16 = shift
+      disableScroll();
+    }
+  });
+  document.addEventListener("keyup", event => {
+    if (event.keyCode === 16) {
+      //keyCode 16 = shift
+      enableScroll();
+    }
+  });
+
   let config = {
     container: "pv-vis",
-    viewport: [2000, 2000],
+    viewport: [2000, 4000],
     profiling: true
   }
   
   let views = [
     {
-      id: 'chart1', width: 800, height: 300,
+      id: 'map_tight', offset: [50,0],
       padding: {left: 80, right: 10, top: 20, bottom: 50},
-      offset: [50, 0],
-      gridlines: {y: true},
-      legend: false
+      width: 1600, height: 900,
     },
     {
-      id: 'map_tight', offset: [50,350],
+      id: 'coordinates_chart', offset: [50,950],
       padding: {left: 80, right: 10, top: 20, bottom: 50},
-      width: 800, height: 450,
-    },
-    {
-      id: 'map_loose', offset: [50,850],
-      padding: {left: 80, right: 10, top: 20, bottom: 50},
-      width: 800, height: 450,
+      width: 800, height: 600,
     }
   ]
 
-  let app = pv(config).view(views).input({
-    method: 'memory',
-    source: function(batchSize) {
-      let dataset = Kepler({size: batchSize, type: 'array'});
-      let data = dataset.data;
-      return data;
-    },
-    batchSize: 5000,
-    schema: Kepler.schema
-  }).batch([
-    {
-      aggregate: {
-        $group: 'ApparentMagnitude',
-        $collect: {count: {$count: '*'}},
-      },
-      out: 'byMagnitude'
-    },
-    {
-      match: {
-        RightAscension: [279.62749, 301.82369],
-        Decline: [36.55995, 52.47462]
-      },
-      aggregate: {
-        $bin: [{RightAscension: 1600}, {Decline: 900}],
-        $collect: {
-          values: {$count: '*'}
-        },
-      },
-      out: 'map_tight'
-    },  
-    {
-      match: {
-        RightAscension: [279.62749, 301.82369],
-        Decline: [36.55995, 52.47462]
-      },
-      aggregate: {
-        $bin: [{RightAscension: 16}, {Decline: 9}],
-        $collect: {
-          values: {$count: '*'}
-        },
-      },
-      out: 'map_loose'
-    }
-  ]).progress([
-    {
-      visualize: {
-        id: 'chart1',
-        in: 'byMagnitude',
-        mark: 'area',
-        x: 'ApparentMagnitude',
-        y: 'count',
-        zero: true,
-        color: 'teal'
-      }
-    },
-    {
-      visualize: {
-        id: 'map_tight',
-        in: 'map_tight',
-        mark: 'circle',
-        color: {
-          field: 'values',
-          exponent: '0.25'
-        },
-        x: 'RightAscension', 
-        y: 'Decline',
-      }
-    },
-    {
-      visualize: {
-        id: 'map_loose',
-        in: 'map_loose',
-        mark: 'circle',
-        color: {
-          field: 'values',
-          exponent: '0.25'
-        },
-        x: 'RightAscension', 
-        y: 'Decline',
-      }
-    }
-  ])
-  // .interact([
-  //   {
-  //     event: 'brush', 
-  //     from: 'chart1', 
-  //     response: {
-  //       map_aggr: {
-  //         selected: {color: 'orange'}
-  //       }
-  //     }
-  //   }
-  // ])
-  .onEach(function(stats, profile) {
-    document.getElementById('stats').innerHTML = '(completed: ' + stats.completed + ')';
-  })
 
+  let ra_range = document.getElementById("ra_range").innterHTML
+
+  console.log(ra_range)
+
+  let app = pv(config).view(views)
+
+  let run = (evt) => {
+    app.input({
+      source: evt.target.files[0],
+      batchSize: 500000,
+      schema: {
+        target_name: 'string',
+        s_ra: 'float',
+        s_dec: 'float',
+        t_min: 'float',
+        t_max: 'float',
+        t_exptime: 'int'
+      }
+    }).batch([
+      {
+        match: {
+          s_ra: [279, 302],
+          s_dec: [36, 53]
+        },
+        aggregate: {
+          $bin: [{s_ra: 1600}, {s_dec: 900}],
+          $collect: {
+            map_values: {$count: '*'}
+          },
+        },
+        out: 'map_tight'
+      },  
+      {
+        match: {
+          s_ra: [279, 302]
+        },
+        aggregate: {
+          $bin: {s_ra: 6},
+          $collect: {
+            chart_values: {$count: '*'},
+            chart_min: {$min: '*'}
+          },
+        },
+        out: 'chart1'
+      }
+    ]).progress([
+      {
+        visualize: {
+          id: 'map_tight',
+          in: 'map_tight',
+          mark: 'rectangle',
+          color: {
+            field: 'map_values',
+            exponent: '0.25'
+          },
+          x: 's_ra', 
+          y: 's_dec',
+        }
+      },
+      {
+        visualize: {
+          id: 'coordinates_chart',
+          in: "chart1",
+          mark: 'bar',
+          color: 'steelblue',
+          x: 's_ra', 
+          y: 'chart_values'
+        }
+      },
+    ])
+    .interact([
+      {
+        event: ['pan','zoom'], 
+        from: 'map_tight', 
+        response: {
+          map_aggr: {
+            selected: {color: 'white'}
+          }
+        }
+      },
+    ])
+  }
+  
   document.getElementById('next-button').onclick = () => {
     try {
       app.next();
@@ -141,18 +154,10 @@ export default function() {
       console.log(e);
     }
   }
+
+  document.getElementById('input-file').onchange = run
 }
 
 
-document.getElementById('pv-demo-description').innerHTML = `
-<h3>Kepler Demo </h3>
-<p>
-  This demo uses sythnetic data to show how PV can be used to create a progressive visualization application with mulitple linked views and interactions.
-</p>
-<p>
-  Press "progress" butoon to incrementally process and visualize data. "Brush-and-link" interaction can be used.
-  The incremental data processing, visualizations, and interactions are accelerated using the GPU.
-</p>
-`;
     
 

@@ -16,10 +16,15 @@
   </div>
 
   <div id="p5-control" style="text-align:center;"></div>
+  
 
   <br>
   
   <div id="sliders">
+    <input type="number" id="ra_min" hidden>
+    <input type="number" id="ra_max" hidden>
+    <input type="number" id="dec_min" hidden>
+    <input type="number" id="dec_max" hidden>
     <p>
       <label for="ra_range">Right Ascension Range:</label>
       <input type="text" id="ra_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
@@ -33,9 +38,9 @@
     <div id="dec-slider-range" style="width: 250px;"></div>
   </div>
   
-
   <br>
 
+  <input type="button" id="confirm-data" value="Confirm Data" style="text-align:center;">
   <div id="buttons" style="text-align:center;">
     <input type="button" id="next-button" value="progress" />
     <input type="button" id="start-button" value="start" />
