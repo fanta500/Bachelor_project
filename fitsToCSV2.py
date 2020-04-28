@@ -9,7 +9,10 @@ csv_columns = []
 glbl_dict = []              # collection of all the datapoints (all the .fits files)
 
 # directory to use
-directory = '/Users/jonathanscomputer/Desktop/Uni/Bachelor/Code/astropy/'
+# G:\KEPLER_DATA\All_quarters\
+# '/Users/jonathanscomputer/Desktop/Uni/Bachelor/Code/astropy/'
+
+directory = 'G:/KEPLER_DATA/All_quarters/'
 directorySize = len(os.listdir(directory))
 filesProcessed = 1
 progress = 0.0

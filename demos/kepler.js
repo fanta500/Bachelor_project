@@ -8,6 +8,13 @@ export default function() {
   //initialize the select file button
   document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" />`
 
+  //make the start buttons disabled upon running the program
+  document.getElementById("start-button").disabled = true
+  document.getElementById("next-button").disabled = true
+
+  //make the confirm parameters button disabled upon running the program
+  document.getElementById("confirm-parameters-button").disabled = true;
+
   function disableScroll() { 
     // Get the current page scroll position 
     let scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
@@ -35,43 +42,45 @@ export default function() {
     }
   });
 
+  function calculateBinRatio(raRange, decRange) {
+    let raMaxRange = $("#ra-slider-range").slider("option", "max") - $("#ra-slider-range").slider("option", "min")
+    let raCurrRange = raRange[1] - raRange[0]
+    let raRatio = raCurrRange / raMaxRange
+
+    let decMaxRange = $("#dec-slider-range").slider("option", "max") - $("#dec-slider-range").slider("option", "min")
+    let decCurrRange = decRange[1] - decRange[0]
+    let decRatio = decCurrRange / decMaxRange
+
+    console.log(raRatio, "    ", decRatio)
+    return [raRatio*1024, decRatio*1024]
+  }
+
+  function getRightAscension() {
+    //This method is invoked when the pipeline is started
+    let ra = [$("#ra-slider-range").slider("option", "values")[0], $("#ra-slider-range").slider("option", "values")[1]]
+    console.log(ra)
+    return ra
+  }
+
+  function getDecline() {
+    //This method is invoked when the pipeline is started
+    let dec = [$("#dec-slider-range").slider("option", "values")[0], $("#dec-slider-range").slider("option", "values")[1]]
+    console.log(dec)
+    return dec
+  }
+
   let config = {
     container: "pv-vis",
     viewport: [2000, 4000],
     profiling: true
   }
 
-  function calculateBinRatio() {
-    let raMaxRange = $("#ra-slider-range").slider("option", "max") - $("#ra-slider-range").slider("option", "min")
-    let raCurrRange = getRightAscension()[1] - getRightAscension()[0]
-    let raRatio = raCurrRange / raMaxRange
-
-    let decMaxRange = $("#dec-slider-range").slider("option", "max") - $("#dec-slider-range").slider("option", "min")
-    let decCurrRange = getDecline()[1] - getDecline()[0]
-    let decRatio = decCurrRange / decMaxRange
-
-    //let ratio = (raRatio*1600) / (decRatio*900)
-    //console.log(raRatio, "    ", decRatio, "    ", ratio)
-    return [raRatio*1600, decRatio*900]
-  }
-
-  function getRightAscension() {
-    //This method is invoked when the pipeline is started
-    let ra = [document.getElementById("ra_min").value, document.getElementById("ra_max").value]
-    //console.log(ra)
-    return ra
-  }
-
-  function getDecline() {
-    //This method is invoked when the pipeline is started
-    let dec = [document.getElementById("dec_min").value, document.getElementById("dec_max").value]
-    //console.log(dec)
-    return dec
-  }
-
   let app = pv(config)
 
   let confirmData = (evt) => {
+    //allow users to click confirm parameters button after data has been selected
+    document.getElementById("confirm-parameters-button").disabled = false;
+    
     app.input({
       source: evt.target.files[0],
       batchSize: 500000,
@@ -87,19 +96,20 @@ export default function() {
   }
 
   let analyseVisualise = () => {
+    
     let ra = getRightAscension()
     let dec = getDecline()
-    let binSize = calculateBinRatio()
+    let binSize = calculateBinRatio(ra, dec)
 
     //define the views based on slider settings
     let views = [
       {
         id: 'map_tight', offset: [50,0],
         padding: {left: 80, right: 10, top: 20, bottom: 50},
-        width: 1600, height: 900,
+        width: binSize[0], height: binSize[1],
       },
       {
-        id: 'coordinates_chart', offset: [50,950],
+        id: 'coordinates_chart', offset: [50, binSize[1]+50],
         padding: {left: 80, right: 10, top: 20, bottom: 50},
         width: 800, height: 600,
       }
@@ -110,6 +120,9 @@ export default function() {
     $( "#dec-slider-range" ).slider( "option", "disabled", true );
     document.getElementById("confirm-parameters-button").disabled = true;
     document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" hidden />`
+    //don't allow pressing of start until parameters are confirmed
+    document.getElementById("start-button").disabled = false
+    document.getElementById("next-button").disabled = false
 
     app.view(views)
     app.batch([
