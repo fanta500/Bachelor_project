@@ -9,10 +9,10 @@ csv_columns = []
 glbl_dict = []              # collection of all the datapoints (all the .fits files)
 
 # directory to use
-# G:\KEPLER_DATA\All_quarters\
-# '/Users/jonathanscomputer/Desktop/Uni/Bachelor/Code/astropy/'
 
-directory = 'G:/KEPLER_DATA/All_quarters/'
+# directory = 'G:/KEPLER_DATA/All_quarters/'
+directory = '/Users/jonathanscomputer/Desktop/Uni/Bachelor/Code/astropy/'
+
 directorySize = len(os.listdir(directory))
 filesProcessed = 1
 progress = 0.0
@@ -56,3 +56,5 @@ try:
             writer.writerow(data)
 except IOError:
     print("I/O error")
+
+print('schema: {', ','.join(csv_columns), '}')
