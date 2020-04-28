@@ -40,19 +40,6 @@ export default function() {
     viewport: [2000, 4000],
     profiling: true
   }
-  
-  let views = [
-    {
-      id: 'map_tight', offset: [50,0],
-      padding: {left: 80, right: 10, top: 20, bottom: 50},
-      width: 1600, height: 900,
-    },
-    {
-      id: 'coordinates_chart', offset: [50,950],
-      padding: {left: 80, right: 10, top: 20, bottom: 50},
-      width: 800, height: 600,
-    }
-  ]
 
   function calculateBinRatio() {
     let raMaxRange = $("#ra-slider-range").slider("option", "max") - $("#ra-slider-range").slider("option", "min")
@@ -63,8 +50,9 @@ export default function() {
     let decCurrRange = getDecline()[1] - getDecline()[0]
     let decRatio = decCurrRange / decMaxRange
 
-    console.log(raRatio, "    ", decRatio)
-    return [raRatio, decRatio]
+    //let ratio = (raRatio*1600) / (decRatio*900)
+    //console.log(raRatio, "    ", decRatio, "    ", ratio)
+    return [raRatio*1600, decRatio*900]
   }
 
   function getRightAscension() {
@@ -81,7 +69,7 @@ export default function() {
     return dec
   }
 
-  let app = pv(config).view(views)
+  let app = pv(config)
 
   let confirmData = (evt) => {
     app.input({
@@ -103,6 +91,27 @@ export default function() {
     let dec = getDecline()
     let binSize = calculateBinRatio()
 
+    //define the views based on slider settings
+    let views = [
+      {
+        id: 'map_tight', offset: [50,0],
+        padding: {left: 80, right: 10, top: 20, bottom: 50},
+        width: 1600, height: 900,
+      },
+      {
+        id: 'coordinates_chart', offset: [50,950],
+        padding: {left: 80, right: 10, top: 20, bottom: 50},
+        width: 800, height: 600,
+      }
+    ]
+
+    //upon confirming parameters, make all sliders and buttons inactive
+    $( "#ra-slider-range" ).slider( "option", "disabled", true );
+    $( "#dec-slider-range" ).slider( "option", "disabled", true );
+    document.getElementById("confirm-parameters-button").disabled = true;
+    document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" hidden />`
+
+    app.view(views)
     app.batch([
       {
         match: {
@@ -110,7 +119,7 @@ export default function() {
           s_dec: dec
         },
         aggregate: {
-          $bin: [{s_ra: binSize[0]*1600}, {s_dec: binSize[1]*900}],
+          $bin: [{s_ra: binSize[0]}, {s_dec: binSize[1]}],
           $collect: {
             map_values: {$count: '*'}
           },
@@ -119,10 +128,10 @@ export default function() {
       },  
       {
         match: {
-          s_ra: [279, 302]
+          s_ra: ra
         },
         aggregate: {
-          $bin: {s_ra: 6},
+          $bin: {s_ra: Math.round(binSize[0]*6)},
           $collect: {
             chart_values: {$count: '*'},
             chart_min: {$min: '*'}
@@ -148,7 +157,7 @@ export default function() {
         visualize: {
           id: 'coordinates_chart',
           in: "chart1",
-          mark: 'bar',
+          mark: 'line',
           color: 'steelblue',
           x: 's_ra', 
           y: 'chart_values'
@@ -188,7 +197,7 @@ export default function() {
   }
 
   document.getElementById('input-file').onchange = confirmData
-  document.getElementById('confirm-data').onclick = analyseVisualise
+  document.getElementById('confirm-parameters-button').onclick = analyseVisualise
 }
 
 
