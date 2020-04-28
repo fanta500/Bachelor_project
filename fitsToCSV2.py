@@ -9,7 +9,7 @@ csv_columns = []
 glbl_dict = []              # collection of all the datapoints (all the .fits files)
 
 # directory to use
-directory = 'G:/KEPLER_DATA/Q0/'
+directory = '/Users/jonathanscomputer/Desktop/Uni/Bachelor/Code/astropy/'
 directorySize = len(os.listdir(directory))
 filesProcessed = 1
 progress = 0.0
@@ -21,11 +21,16 @@ for filename in os.listdir(directory):
         hdulist = fits.open(directory+filename)
 
         my_dict = {}
-        
+        unwanted_data = ['PDC_EPT','PDC_EPTP','NUMBAND','PROCVER','TELESCOP','INSTRUME','FILEVER','TIMVERSN','ORIGIN','EXTVER','EXTNAME','NEXTEND','EXTEND','SIMPLE','PARALLAX','OBJECT','SCPID','TIERABSO','DATE-END','DATE-OBS']
+
         for page in range(len(hdulist)-1):
             for item in hdulist[page].header:
-                if(not_yet_called):             # need to get column names only once
-                    csv_columns.append(item)    # add item name to list of names
+                if(item in unwanted_data): # unwanted item check
+                    continue
+                if(item in my_dict.keys()): # checking for duplicate item
+                    continue
+                if(not_yet_called):     # need to get column names only once
+                    csv_columns.append(item)                                                 # add item name to list of names
                 my_dict[item] = hdulist[page].header[item]
         
         not_yet_called = False 
