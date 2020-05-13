@@ -10,8 +10,8 @@ glbl_dict = []              # collection of all the datapoints (all the .fits fi
 
 # directory to use
 
-# directory = 'G:/KEPLER_DATA/All_quarters/'
-directory = '/Users/jonathanscomputer/Desktop/Uni/Bachelor/Code/astropy/'
+directory = 'G:/KEPLER_DATA/All_quarters/'
+#directory = '/Users/jonathanscomputer/Desktop/Uni/Bachelor/Code/astropy/'
 
 directorySize = len(os.listdir(directory))
 filesProcessed = 1

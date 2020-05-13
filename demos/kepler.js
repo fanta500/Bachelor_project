@@ -2,7 +2,7 @@ import pv from '..';
 import makeSliders from './double_input_slider'
 
 export default function() {
-  //initialize the sliders to control right ascension and decline
+  //initialize the sliders to control various attributes
   makeSliders()
 
   //initialize the select file button
@@ -51,22 +51,22 @@ export default function() {
     let decCurrRange = decRange[1] - decRange[0]
     let decRatio = decCurrRange / decMaxRange
 
-    console.log(raRatio, "    ", decRatio)
+    //console.log(raRatio, "    ", decRatio)
     return [raRatio*1024, decRatio*1024]
   }
 
   function getRightAscension() {
     //This method is invoked when the pipeline is started
-    let ra = [$("#ra-slider-range").slider("option", "values")[0], $("#ra-slider-range").slider("option", "values")[1]]
-    console.log(ra)
-    return ra
+    let ra_range = [$("#ra-slider-range").slider("option", "values")[0], $("#ra-slider-range").slider("option", "values")[1]]
+    //console.log(ra)
+    return ra_range
   }
 
   function getDecline() {
     //This method is invoked when the pipeline is started
-    let dec = [$("#dec-slider-range").slider("option", "values")[0], $("#dec-slider-range").slider("option", "values")[1]]
-    console.log(dec)
-    return dec
+    let dec_range = [$("#dec-slider-range").slider("option", "values")[0], $("#dec-slider-range").slider("option", "values")[1]]
+    //console.log(dec)
+    return dec_range
   }
 
   let config = {
@@ -83,23 +83,50 @@ export default function() {
     
     app.input({
       source: evt.target.files[0],
-      batchSize: 500000,
-      schema: {
-        target_name: 'string',
-        s_ra: 'float',
-        s_dec: 'float',
-        t_min: 'float',
-        t_max: 'float',
-        t_exptime: 'int'
+      batchSize: 50000,
+      schema: { 
+        st_delivname: 'string',
+        kepid: 'int',
+        tm_designation: 'string',
+        ra: 'float',
+        dec: 'float',
+        kepmag: 'float',
+        teff: 'int',
+        teff_err1: 'int',
+        teff_err2: 'int',
+        teff_prov: 'string',
+        logg: 'float',
+        logg_err1: 'float',
+        logg_err2: 'float',
+        logg_prov: 'string',
+        feh: 'float',
+        feh_err1: 'float',
+        feh_err2: 'float',
+        feh_prov: 'string',
+        radius: 'float',
+        radius_err1: 'float',
+        radius_err2: 'float',
+        mass: 'float',
+        mass_err1: 'float',
+        mass_err2: 'float',
+        dens: 'float',
+        dens_err1: 'float',
+        dens_err2: 'float',
+        prov_sec: 'string',
+        nconfp: 'int',
+        nkoi: 'int',
+        ntce: 'int',
+        st_quarters: 'int',
+        st_vet_date_str: 'string',
       }
     });
   }
 
   let analyseVisualise = () => {
     
-    let ra = getRightAscension()
-    let dec = getDecline()
-    let binSize = calculateBinRatio(ra, dec)
+    let ra_range = getRightAscension()
+    let dec_range = getDecline()
+    let binSize = calculateBinRatio(ra_range, dec_range)
 
     //define the views based on slider settings
     let views = [
@@ -128,11 +155,11 @@ export default function() {
     app.batch([
       {
         match: {
-          s_ra: ra,
-          s_dec: dec
+          ra: ra_range,
+          dec: dec_range
         },
         aggregate: {
-          $bin: [{s_ra: binSize[0]}, {s_dec: binSize[1]}],
+          $bin: [{ra: binSize[0]}, {dec: binSize[1]}],
           $collect: {
             map_values: {$count: '*'}
           },
@@ -141,10 +168,10 @@ export default function() {
       },  
       {
         match: {
-          s_ra: ra
+          ra: ra_range
         },
         aggregate: {
-          $bin: {s_ra: Math.round(binSize[0]*6)},
+          $bin: {ra: 12},
           $collect: {
             chart_values: {$count: '*'},
             chart_min: {$min: '*'}
@@ -162,8 +189,8 @@ export default function() {
             field: 'map_values',
             exponent: '0.25'
           },
-          x: 's_ra', 
-          y: 's_dec',
+          x: 'ra', 
+          y: 'dec',
         }
       },
       {
@@ -172,7 +199,7 @@ export default function() {
           in: "chart1",
           mark: 'line',
           color: 'steelblue',
-          x: 's_ra', 
+          x: 'ra', 
           y: 'chart_values'
         }
       },
@@ -182,9 +209,7 @@ export default function() {
         event: ['pan','zoom'], 
         from: 'map_tight', 
         response: {
-          map_aggr: {
-            selected: {color: 'white'}
-          }
+          map_aggr: {}
         }
       },
     ]);

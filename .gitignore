@@ -5,3 +5,5 @@ node_modules
 .idea/workspace.xml
 .idea/vcs.xml
 .idea/modules.xml
+demos/keplercopy.js
+demos/keplercopy2.js
