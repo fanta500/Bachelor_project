@@ -21,7 +21,7 @@
 </head>
 
 <body>
-  <div id="pv-demo-description" style="text-align:center;">
+  <div id="pv-demo-description" style="text-align:center; font-family: sans-serif;">
     <h1>Progressive Kepler Space Telescope Data Visualisation</h3>
     <p>
       Please select the Kepler Dataset provided with this program.
@@ -32,12 +32,9 @@
   </div>
 
   <!-- Initialized by a script, to not keep file information in memory -->
-  <div id="p5-control" style="text-align:center;"></div>
-
-  <br>
+  <div id="p5-control" style="text-align:center; font-family: sans-serif;"></div>
   
-
-  <div class="grid-container">
+  <div class="grid-container" style="font-family: sans-serif;">
     <div>
       <p>
       <label for="ra_range">Right Ascension (deg):</label>
@@ -111,21 +108,35 @@
     
   </div>
   
+  <div style="text-align: center; font-family: sans-serif;">Select your estimated computer specs (Affects batch size): 
+    <fieldset>
+      <label for="lowGPU">Low (Weak GPU)</label>
+      <input type="radio" name="radio-1" id="lowGPU" checked>
+      <label for="medGPU">Med (Average GPU)</label>
+      <input type="radio" name="radio-1" id="medGPU">
+      <label for="highGPU">High (Strong GPU)</label>
+      <input type="radio" name="radio-1" id="highGPU">
+      <label for="ultraGPU">Ultra (Extreme GPU)</label>
+      <input type="radio" name="radio-1" id="ultraGPU">
+    </fieldset>
+  </div>
+  
+
   <br>
 
   <div id="buttons" disabled style="text-align:center;">
-    <input type="button" id="confirm-parameters-button" value="Confirm Parameters">
+    <input type="button" id="confirm-parameters-button" value="CONFIRM PARAMETERS">
     <br>
     <br>
-    <input type="button" id="next-button" value="progress" />
-    <input type="button" id="start-button" value="start" />
+    <input type="button" id="next-button" value="PROGRESS" />
+    <input type="button" id="start-button" value="START" />
   </div>
   
   <br>
 
   <div style="text-align: center;">
-    <span id="stats" style="font-weight: bold; font-size: 1.28em;">
-      Data processed: 0 %
+    <span id="stats" style="font-family: sans-serif; font-size: large; font: bolder;">
+      DATA PROCESSED: 0 %
      </span>
   </div>
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">

@@ -1,5 +1,5 @@
 import pv from '..';
-import makeSliders from './double_input_slider'
+import makeSliders from './sliders'
 
 export default function() {
   //initialize the sliders to control various attributes
@@ -131,10 +131,29 @@ export default function() {
     $( "#density-slider-range" ).slider( "option", "disabled", true );
 
     document.getElementById("confirm-parameters-button").disabled = true;
-    document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" hidden />`
+    document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" disabled />`
     //don't allow pressing of start until parameters are confirmed
     document.getElementById("start-button").disabled = false
     document.getElementById("next-button").disabled = false
+  }
+
+  function enableButtonsAndSliders() {
+    //upon confirming parameters, make all sliders and buttons inactive
+    $( "#ra-slider-range" ).slider( "option", "disabled", false );
+    $( "#dec-slider-range" ).slider( "option", "disabled", false );
+    $( "#mag-slider-range" ).slider( "option", "disabled", false );
+    $( "#temp-slider-range" ).slider( "option", "disabled", false );
+    $( "#grav-slider-range" ).slider( "option", "disabled", false );
+    $( "#metallicity-slider-range" ).slider( "option", "disabled", false );
+    $( "#radius-slider-range" ).slider( "option", "disabled", false );
+    $( "#mass-slider-range" ).slider( "option", "disabled", false );
+    $( "#density-slider-range" ).slider( "option", "disabled", false );
+
+    document.getElementById("confirm-parameters-button").disabled = false;
+    document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" />`
+    //don't allow pressing of start until parameters are confirmed
+    document.getElementById("start-button").disabled = true
+    document.getElementById("next-button").disabled = true
   }
 
   let config = {
@@ -146,19 +165,31 @@ export default function() {
   let app = pv(config)
 
   let datasetSize;
-  let batchSize = 1000000
+  let batchSize;
   let n = 1
+  let dataset;
 
   let confirmData = (evt) => {
     //allow users to click confirm parameters button after data has been selected
     document.getElementById("confirm-parameters-button").disabled = false;
-    console.log(evt.target.files[0].size)
     datasetSize = evt.target.files[0].size
-    
+    dataset = evt.target.files[0]
+  }
 
+  let analyseVisualise = () => {
+    // check which GPU selection has been made to determine batch size for optimal fluidity
+    if (document.getElementById("lowGPU").checked) {
+      batchSize = 100000
+    } else if (document.getElementById("medGPU").checked) {
+      batchSize = 500000
+    } else if (document.getElementById("highGPU").checked){
+      batchSize = 1000000
+    } else {
+      batchSize = 2500000
+    }
     app.input({
-      source: evt.target.files[0],
-      batchSize: 1000000,
+      source: dataset,
+      batchSize: batchSize,
       schema: { 
         st_delivname: 'string',
         kepid: 'int',
@@ -195,9 +226,6 @@ export default function() {
         st_vet_date_str: 'string',
       }
     });
-  }
-
-  let analyseVisualise = () => {
     
     let ra_range = getRightAscension()
     let dec_range = getDecline()
@@ -217,6 +245,7 @@ export default function() {
         id: 'coordinate_map', offset: [0,0],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: binSize[0], height: binSize[1],
+        legend: true
       },
       {
         id: 'temp_distribution', offset: [binSize[0], 5],
@@ -243,10 +272,13 @@ export default function() {
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 800, height: 600,
       },
-      
-      
       {
         id: 'density_distribution', offset: [50, binSize[1]+50],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 800, height: 600,
+      },
+      {
+        id: 'metallicity_distribution', offset: [50, binSize[1]+50],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 800, height: 600,
       },
@@ -360,7 +392,7 @@ export default function() {
           dens: density_range
         },
         aggregate: {
-          $bin: {radius: 50},
+          $bin: {radius: 5},
           $collect: {
             radius_count: {$count: '*'},
             radius_min: {$max: '*'},
@@ -418,10 +450,10 @@ export default function() {
         visualize: {
           id: 'radius_distribution',
           in: "radius_distribution",
-          mark: 'rectangle',
+          mark: 'bar',
           color: 'teal',
           x: 'radius', 
-          y: 'radius_count'
+          height: 'radius_count'
         }
       },
     ])
@@ -430,16 +462,25 @@ export default function() {
         event: ['brush'], 
         from: 'coordinate_map', 
         response: {
-          
+          radius_distribution: {selected: {color: 'orange'}}
         }
       },
     ])
+    // .annotate([
+    //   {
+    //     id: 'temp_distribution',
+
+    //   }
+    // ])
     .onEach(function() {
       let progress = (((n * batchSize) / datasetSize) * 100)
       progress = (progress > 100 ? progress = 100 : progress = progress)
-      document.getElementById('stats').innerHTML = 'Data processed: ' + progress.toFixed(2) + ' %';
+      document.getElementById('stats').innerHTML = 'DATA PROCESSED: ' + progress.toFixed(2) + ' %';
       n += 1
-    });
+      if (progress === 100) {
+        enableButtonsAndSliders()
+      }
+    })
   }
     
   
