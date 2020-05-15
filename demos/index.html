@@ -1,10 +1,26 @@
 <html>
 <head>
+  <style>
+    .grid-container {
+      display: grid;
+      grid-template: none / auto auto auto auto auto; /* syntax: size of first row / # of columns defined by how many arguments here */
+      grid-gap: 30px; /* gap between grid elements */
+      background-color: rgb(255, 255, 255); /* container background */
+      padding: 30px; /* outer padding of container */
+    }
+    
+    .grid-container > div {
+      background-color: rgba(255, 255, 255, 0.8); /* color of the grid elements */
+      text-align: left;
+      padding: 20px 0;
+      font-size: 16px;
+    }
+  </style>
   <meta charset="utf-8">
   <title>Kepler PVA</title>
 </head>
-<body>
 
+<body>
   <div id="pv-demo-description" style="text-align:center;">
     <h1>Progressive Kepler Space Telescope Data Visualisation</h3>
     <p>
@@ -15,37 +31,103 @@
     </p>
   </div>
 
+  <!-- Initialized by a script, to not keep file information in memory -->
   <div id="p5-control" style="text-align:center;"></div>
-  <!-- <input type="file" id="input-file" style="text-align:center;"> -->
 
   <br>
   
-  <div id="sliders">
-    <!-- <input type="number" id="ra_min" hidden>
-    <input type="number" id="ra_max" hidden>
-    <input type="number" id="dec_min" hidden>
-    <input type="number" id="dec_max" hidden> -->
-    <p>
-      <label for="ra_range">Right Ascension Range:</label>
-      <input type="text" id="ra_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-    <div id="ra-slider-range" style="width: 250px;"></div>
 
-    <p>
-      <label for="dec_range">Decline Range:</label>
-      <input type="text" id="dec_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-    <div id="dec-slider-range" style="width: 250px;"></div>
+  <div class="grid-container">
+    <div>
+      <p>
+      <label for="ra_range">Right Ascension (deg):</label>
+      <input type="text" id="ra_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+    <div id="ra-slider-range" style="width: auto;"></div></div>
+    
+    <div>
+      <p>
+        <label for="dec_range">Decline (deg):</label>
+        <input type="text" id="dec_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="dec-slider-range" style="width: auto;"></div>
+    </div>
+    
+    <div>
+      <p>
+        <label for="mag_range">Magnitude:</label>
+        <input type="text" id="mag_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="mag-slider-range" style="width: auto;"></div>
+    </div>
+    
+    <div>
+      <p>
+        <label for="temp_range">Surface Temperature (K):</label>
+        <input type="text" id="temp_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="temp-slider-range" style="width: auto;"></div>
+    </div>
+    
+    <div>
+      <p>
+        <label for="grav_range">Surface Gravity (log10(cm / s^2)):</label>
+        <input type="text" id="grav_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="grav-slider-range" style="width: auto;"></div>
+    </div>
+    
+    <div>
+      <p>
+        <label for="metallicity_range">Surface Metallicity (log10(Fe / H):</label>
+        <input type="text" id="metallicity_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="metallicity-slider-range" style="width: auto;"></div>
+    </div>
+    
+    <div>
+      <p>
+        <label for="radius_range">Radius (solar radii):</label>
+        <input type="text" id="radius_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="radius-slider-range" style="width: auto;"></div>
+    </div>
+    
+    <div>
+      <p>
+        <label for="mass_range">Mass (solar mass):</label>
+        <input type="text" id="mass_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="mass-slider-range" style="width: auto;"></div>  
+    </div>
+    
+    <div>
+      <p>
+        <label for="density_range">Density (g / cm^3):</label>
+        <input type="text" id="density_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="density-slider-range" style="width: auto;"></div>
+    </div>
+    
   </div>
   
   <br>
 
-  <input type="button" id="confirm-parameters-button" value="Confirm Parameters" style="text-align:center;">
   <div id="buttons" disabled style="text-align:center;">
+    <input type="button" id="confirm-parameters-button" value="Confirm Parameters">
+    <br>
+    <br>
     <input type="button" id="next-button" value="progress" />
     <input type="button" id="start-button" value="start" />
   </div>
   
+  <br>
+
+  <div style="text-align: center;">
+    <span id="stats" style="font-weight: bold; font-size: 1.28em;">
+      Data processed: 0 %
+     </span>
+  </div>
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>

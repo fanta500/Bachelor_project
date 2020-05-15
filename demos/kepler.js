@@ -58,15 +58,83 @@ export default function() {
   function getRightAscension() {
     //This method is invoked when the pipeline is started
     let ra_range = [$("#ra-slider-range").slider("option", "values")[0], $("#ra-slider-range").slider("option", "values")[1]]
-    //console.log(ra)
+    //console.log(ra_range)
     return ra_range
   }
 
   function getDecline() {
     //This method is invoked when the pipeline is started
     let dec_range = [$("#dec-slider-range").slider("option", "values")[0], $("#dec-slider-range").slider("option", "values")[1]]
-    //console.log(dec)
+    //console.log(dec_range)
     return dec_range
+  }
+
+  function getMagnitude() {
+    //This method is invoked when the pipeline is started
+    let mag_range = [$("#mag-slider-range").slider("option", "values")[0], $("#mag-slider-range").slider("option", "values")[1]]
+    //console.log(mag_range)
+    return mag_range
+  }
+
+  function getSurfTemp() {
+    //This method is invoked when the pipeline is started
+    let temp_range = [$("#temp-slider-range").slider("option", "values")[0], $("#temp-slider-range").slider("option", "values")[1]]
+    //console.log(temp_range)
+    return temp_range
+  }
+
+  function getSurfGrav() {
+    //This method is invoked when the pipeline is started
+    let grav_range = [$("#grav-slider-range").slider("option", "values")[0], $("#grav-slider-range").slider("option", "values")[1]]
+    //console.log(grav_range)
+    return grav_range
+  }
+
+  function getMetallicity() {
+    //This method is invoked when the pipeline is started
+    let metal_range = [$("#metallicity-slider-range").slider("option", "values")[0], $("#metallicity-slider-range").slider("option", "values")[1]]
+    //console.log(metal_range)
+    return metal_range
+  }
+
+  function getRadius() {
+    //This method is invoked when the pipeline is started
+    let radius_range = [$("#radius-slider-range").slider("option", "values")[0], $("#radius-slider-range").slider("option", "values")[1]]
+    //console.log(radius_range)
+    return radius_range
+  }
+
+  function getMass() {
+    //This method is invoked when the pipeline is started
+    let mass_range = [$("#mass-slider-range").slider("option", "values")[0], $("#mass-slider-range").slider("option", "values")[1]]
+    //console.log(mass_range)
+    return mass_range
+  }
+
+  function getDensity() {
+    //This method is invoked when the pipeline is started
+    let density_range = [$("#density-slider-range").slider("option", "values")[0], $("#density-slider-range").slider("option", "values")[1]]
+    //console.log(density_range)
+    return density_range
+  }
+
+  function disableButtonsAndSliders() {
+    //upon confirming parameters, make all sliders and buttons inactive
+    $( "#ra-slider-range" ).slider( "option", "disabled", true );
+    $( "#dec-slider-range" ).slider( "option", "disabled", true );
+    $( "#mag-slider-range" ).slider( "option", "disabled", true );
+    $( "#temp-slider-range" ).slider( "option", "disabled", true );
+    $( "#grav-slider-range" ).slider( "option", "disabled", true );
+    $( "#metallicity-slider-range" ).slider( "option", "disabled", true );
+    $( "#radius-slider-range" ).slider( "option", "disabled", true );
+    $( "#mass-slider-range" ).slider( "option", "disabled", true );
+    $( "#density-slider-range" ).slider( "option", "disabled", true );
+
+    document.getElementById("confirm-parameters-button").disabled = true;
+    document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" hidden />`
+    //don't allow pressing of start until parameters are confirmed
+    document.getElementById("start-button").disabled = false
+    document.getElementById("next-button").disabled = false
   }
 
   let config = {
@@ -77,13 +145,20 @@ export default function() {
 
   let app = pv(config)
 
+  let datasetSize;
+  let batchSize = 1000000
+  let n = 1
+
   let confirmData = (evt) => {
     //allow users to click confirm parameters button after data has been selected
     document.getElementById("confirm-parameters-button").disabled = false;
+    console.log(evt.target.files[0].size)
+    datasetSize = evt.target.files[0].size
     
+
     app.input({
       source: evt.target.files[0],
-      batchSize: 50000,
+      batchSize: 1000000,
       schema: { 
         st_delivname: 'string',
         kepid: 'int',
@@ -128,35 +203,70 @@ export default function() {
     let dec_range = getDecline()
     let binSize = calculateBinRatio(ra_range, dec_range)
 
+    let mag_range = getMagnitude()
+    let temp_range = getSurfTemp()
+    let grav_range = getSurfGrav()
+    let metal_range = getMetallicity()
+    let radius_range = getRadius()
+    let mass_range = getMass()
+    let density_range = getDensity()
+
     //define the views based on slider settings
     let views = [
       {
-        id: 'map_tight', offset: [50,0],
-        padding: {left: 80, right: 10, top: 20, bottom: 50},
+        id: 'coordinate_map', offset: [0,0],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: binSize[0], height: binSize[1],
       },
       {
-        id: 'coordinates_chart', offset: [50, binSize[1]+50],
+        id: 'temp_distribution', offset: [binSize[0], 5],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 500, height: 500,
+      },
+      {
+        id: 'mag_distribution', offset: [binSize[0]+500, 5],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 500, height: 500,
+      },
+      {
+        id: 'gravity_distribution', offset: [50, binSize[1]+50],
         padding: {left: 80, right: 10, top: 20, bottom: 50},
         width: 800, height: 600,
-      }
+      },
+      {
+        id: 'radius_distribution', offset: [50, binSize[1]+50],
+        padding: {left: 80, right: 10, top: 20, bottom: 50},
+        width: 800, height: 600,
+      },
+      {
+        id: 'mass_distribution', offset: [50, binSize[1]+50],
+        padding: {left: 80, right: 10, top: 20, bottom: 50},
+        width: 800, height: 600,
+      },
+      {
+        id: 'density_distribution', offset: [50, binSize[1]+50],
+        padding: {left: 80, right: 10, top: 20, bottom: 50},
+        width: 800, height: 600,
+      },
     ]
 
-    //upon confirming parameters, make all sliders and buttons inactive
-    $( "#ra-slider-range" ).slider( "option", "disabled", true );
-    $( "#dec-slider-range" ).slider( "option", "disabled", true );
-    document.getElementById("confirm-parameters-button").disabled = true;
-    document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" hidden />`
-    //don't allow pressing of start until parameters are confirmed
-    document.getElementById("start-button").disabled = false
-    document.getElementById("next-button").disabled = false
+
+    disableButtonsAndSliders()
+    
 
     app.view(views)
     app.batch([
       {
         match: {
           ra: ra_range,
-          dec: dec_range
+          dec: dec_range,
+          kepmag: mag_range,
+          teff: temp_range,
+          logg: grav_range,
+          feh: metal_range,
+          radius: radius_range,
+          mass: mass_range,
+          dens: density_range
         },
         aggregate: {
           $bin: [{ra: binSize[0]}, {dec: binSize[1]}],
@@ -164,27 +274,60 @@ export default function() {
             map_values: {$count: '*'}
           },
         },
-        out: 'map_tight'
+        out: 'coordinate_map'
       },  
       {
         match: {
-          ra: ra_range
+          ra: ra_range,
+          dec: dec_range,
+          kepmag: mag_range,
+          teff: temp_range,
+          logg: grav_range,
+          feh: metal_range,
+          radius: radius_range,
+          mass: mass_range,
+          dens: density_range
         },
         aggregate: {
-          $bin: {ra: 12},
+          $bin: {teff: 250},
           $collect: {
-            chart_values: {$count: '*'},
-            chart_min: {$min: '*'}
+            temp_count: {$count: '*'},
+            temp_min: {$max: '*'},
+            temp_max: {$min: '*'},
+            temp_avg: {$avg: '*'}
           },
         },
-        out: 'chart1'
+        out: 'temp_distribution'
+      },
+      {
+        match: {
+          ra: ra_range,
+          dec: dec_range,
+          kepmag: mag_range,
+          teff: temp_range,
+          logg: grav_range,
+          feh: metal_range,
+          radius: radius_range,
+          mass: mass_range,
+          dens: density_range
+        },
+        aggregate: {
+          $bin: {kepmag: 250},
+          $collect: {
+            mag_count: {$count: '*'},
+            mag_min: {$max: '*'},
+            mag_max: {$min: '*'},
+            mag_avg: {$avg: '*'}
+          },
+        },
+        out: 'mag_distribution'
       }
     ]).progress([
       {
         visualize: {
-          id: 'map_tight',
-          in: 'map_tight',
-          mark: 'rectangle',
+          id: 'coordinate_map',
+          in: 'coordinate_map',
+          mark: 'circle',
           color: {
             field: 'map_values',
             exponent: '0.25'
@@ -195,25 +338,42 @@ export default function() {
       },
       {
         visualize: {
-          id: 'coordinates_chart',
-          in: "chart1",
+          id: 'temp_distribution',
+          in: "temp_distribution",
           mark: 'line',
-          color: 'steelblue',
-          x: 'ra', 
-          y: 'chart_values'
+          color: 'teal',
+          x: 'teff', 
+          y: 'temp_count'
+        }
+      },
+      {
+        visualize: {
+          id: 'mag_distribution',
+          in: "mag_distribution",
+          mark: 'line',
+          color: 'teal',
+          x: 'kepmag', 
+          y: 'mag_count'
         }
       },
     ])
     .interact([
       {
-        event: ['pan','zoom'], 
-        from: 'map_tight', 
+        event: ['pan', 'zoom'], 
+        from: 'coordinate_map', 
         response: {
           map_aggr: {}
         }
       },
-    ]);
-    
+    ])
+    .onEach(function() {
+      let progress = (((n * batchSize) / datasetSize) * 100)
+      console.log(progress)
+      progress = (progress > 100 ? progress = 100 : progress = progress)
+      console.log(progress)
+      document.getElementById('stats').innerHTML = 'Data processed: ' + progress.toFixed(2) + ' %';
+      n += 1
+    });
   }
     
   
@@ -226,6 +386,7 @@ export default function() {
     }
   }
   document.getElementById('start-button').onclick = () => {
+    window.scrollTo(0, 550)
     try {
       app.start();
     }
