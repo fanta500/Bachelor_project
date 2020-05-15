@@ -229,23 +229,25 @@ export default function() {
         width: 500, height: 500,
       },
       {
+        id: 'mass_distribution', offset: [binSize[0], 505],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 500, height: 500,
+      },
+      {
+        id: 'radius_distribution', offset: [binSize[0]+500, 505],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 500, height: 500,
+      },
+      {
         id: 'gravity_distribution', offset: [50, binSize[1]+50],
-        padding: {left: 80, right: 10, top: 20, bottom: 50},
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 800, height: 600,
       },
-      {
-        id: 'radius_distribution', offset: [50, binSize[1]+50],
-        padding: {left: 80, right: 10, top: 20, bottom: 50},
-        width: 800, height: 600,
-      },
-      {
-        id: 'mass_distribution', offset: [50, binSize[1]+50],
-        padding: {left: 80, right: 10, top: 20, bottom: 50},
-        width: 800, height: 600,
-      },
+      
+      
       {
         id: 'density_distribution', offset: [50, binSize[1]+50],
-        padding: {left: 80, right: 10, top: 20, bottom: 50},
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 800, height: 600,
       },
     ]
@@ -321,13 +323,59 @@ export default function() {
           },
         },
         out: 'mag_distribution'
+      },
+      {
+        match: {
+          ra: ra_range,
+          dec: dec_range,
+          kepmag: mag_range,
+          teff: temp_range,
+          logg: grav_range,
+          feh: metal_range,
+          radius: radius_range,
+          mass: mass_range,
+          dens: density_range
+        },
+        aggregate: {
+          $bin: {mass: 250},
+          $collect: {
+            mass_count: {$count: '*'},
+            mass_min: {$max: '*'},
+            mass_max: {$min: '*'},
+            mass_avg: {$avg: '*'}
+          },
+        },
+        out: 'mass_distribution'
+      },
+      {
+        match: {
+          ra: ra_range,
+          dec: dec_range,
+          kepmag: mag_range,
+          teff: temp_range,
+          logg: grav_range,
+          feh: metal_range,
+          radius: radius_range,
+          mass: mass_range,
+          dens: density_range
+        },
+        aggregate: {
+          $bin: {radius: 50},
+          $collect: {
+            radius_count: {$count: '*'},
+            radius_min: {$max: '*'},
+            radius_max: {$min: '*'},
+            radius_avg: {$avg: '*'}
+          },
+        },
+        out: 'radius_distribution'
       }
     ]).progress([
       {
         visualize: {
           id: 'coordinate_map',
           in: 'coordinate_map',
-          mark: 'circle',
+          mark: 'rectangle',
           color: {
             field: 'map_values',
             exponent: '0.25'
@@ -356,21 +404,39 @@ export default function() {
           y: 'mag_count'
         }
       },
+      {
+        visualize: {
+          id: 'mass_distribution',
+          in: "mass_distribution",
+          mark: 'line',
+          color: 'teal',
+          x: 'mass', 
+          y: 'mass_count'
+        }
+      },
+      {
+        visualize: {
+          id: 'radius_distribution',
+          in: "radius_distribution",
+          mark: 'rectangle',
+          color: 'teal',
+          x: 'radius', 
+          y: 'radius_count'
+        }
+      },
     ])
     .interact([
       {
-        event: ['pan', 'zoom'], 
+        event: ['brush'], 
         from: 'coordinate_map', 
         response: {
-          map_aggr: {}
+          
         }
       },
     ])
     .onEach(function() {
       let progress = (((n * batchSize) / datasetSize) * 100)
-      console.log(progress)
       progress = (progress > 100 ? progress = 100 : progress = progress)
-      console.log(progress)
       document.getElementById('stats').innerHTML = 'Data processed: ' + progress.toFixed(2) + ' %';
       n += 1
     });
