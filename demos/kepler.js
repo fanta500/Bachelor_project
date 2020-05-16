@@ -158,7 +158,7 @@ export default function() {
 
   let config = {
     container: "pv-vis",
-    viewport: [2000, 4000],
+    viewport: [1850, 4000],
     profiling: true
   }
 
@@ -187,6 +187,7 @@ export default function() {
     } else {
       batchSize = 2500000
     }
+
     app.input({
       source: dataset,
       batchSize: batchSize,
@@ -239,48 +240,68 @@ export default function() {
     let mass_range = getMass()
     let density_range = getDensity()
 
+    let mapDim = 925
     //define the views based on slider settings
     let views = [
+      // the map
       {
         id: 'coordinate_map', offset: [0,0],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: binSize[0], height: binSize[1],
-        legend: true
+        width: mapDim, height: mapDim,
+      },
+      // row 1 right of map
+      {
+        id: 'temp_distribution', offset: [mapDim, 5],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 455, height: 455,
       },
       {
-        id: 'temp_distribution', offset: [binSize[0], 5],
+        id: 'mag_distribution', offset: [mapDim+455, 5],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 500, height: 500,
+        width: 455, height: 455,
+      },
+      // row 2 right of map
+      {
+        id: 'mass_distribution', offset: [mapDim, 460],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 455, height: 455,
       },
       {
-        id: 'mag_distribution', offset: [binSize[0]+500, 5],
+        id: 'radius_distribution', offset: [mapDim+455, 460],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 500, height: 500,
+        width: 455, height: 455,
+      },
+      // row 1 below map
+      {
+        id: 'planetsInSystem', offset: [50, mapDim+50],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 600, height: 500,
       },
       {
-        id: 'mass_distribution', offset: [binSize[0], 505],
+        id: 'KOIsInSystem', offset: [600+50, mapDim+50],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 500, height: 500,
+        width: 600, height: 500,
       },
       {
-        id: 'radius_distribution', offset: [binSize[0]+500, 505],
+        id: 'TCEsInSystem', offset: [2*600+50, mapDim+50],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 500, height: 500,
+        width: 600, height: 500,
+      },
+      // row 2 below map
+      {
+        id: 'gravity_distribution', offset: [50, mapDim+50+500],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 600, height: 500,
       },
       {
-        id: 'gravity_distribution', offset: [50, binSize[1]+50],
+        id: 'density_distribution', offset: [600+50, mapDim+50+500],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 800, height: 600,
+        width: 600, height: 500,
       },
       {
-        id: 'density_distribution', offset: [50, binSize[1]+50],
+        id: 'metallicity_distribution', offset: [2*600+50, mapDim+50+500],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 800, height: 600,
-      },
-      {
-        id: 'metallicity_distribution', offset: [50, binSize[1]+50],
-        padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 800, height: 600,
+        width: 600, height: 500,
       },
     ]
 
@@ -392,7 +413,7 @@ export default function() {
           dens: density_range
         },
         aggregate: {
-          $bin: {radius: 5},
+          $bin: {radius: 25},
           $collect: {
             radius_count: {$count: '*'},
             radius_min: {$max: '*'},
@@ -401,7 +422,127 @@ export default function() {
           },
         },
         out: 'radius_distribution'
-      }
+      },
+      {
+        match: {
+          ra: ra_range,
+          dec: dec_range,
+          kepmag: mag_range,
+          teff: temp_range,
+          logg: grav_range,
+          feh: metal_range,
+          radius: radius_range,
+          mass: mass_range,
+          dens: density_range
+        },
+        aggregate: {
+          $group: 'nconfp',
+          $collect: {
+            planets_count: {$count: '*'},
+          },
+        },
+        out: 'planets'
+      },
+      {
+        match: {
+          ra: ra_range,
+          dec: dec_range,
+          kepmag: mag_range,
+          teff: temp_range,
+          logg: grav_range,
+          feh: metal_range,
+          radius: radius_range,
+          mass: mass_range,
+          dens: density_range
+        },
+        aggregate: {
+          $group: 'nkoi',
+          $collect: {
+            KOIs_count: {$count: '*'},
+          },
+        },
+        out: 'KOIs'
+      },
+      {
+        match: {
+          ra: ra_range,
+          dec: dec_range,
+          kepmag: mag_range,
+          teff: temp_range,
+          logg: grav_range,
+          feh: metal_range,
+          radius: radius_range,
+          mass: mass_range,
+          dens: density_range
+        },
+        aggregate: {
+          $group: 'ntce',
+          $collect: {
+            TCEs_count: {$count: '*'},
+          },
+        },
+        out: 'TCEs'
+      },
+      {
+        match: {
+          ra: ra_range,
+          dec: dec_range,
+          kepmag: mag_range,
+          teff: temp_range,
+          logg: grav_range,
+          feh: metal_range,
+          radius: radius_range,
+          mass: mass_range,
+          dens: density_range
+        },
+        aggregate: {
+          $bin: {logg: 250},
+          $collect: {
+            gravity_count: {$count: '*'},
+          },
+        },
+        out: 'gravity_distribution'
+      },
+      {
+        match: {
+          ra: ra_range,
+          dec: dec_range,
+          kepmag: mag_range,
+          teff: temp_range,
+          logg: grav_range,
+          feh: metal_range,
+          radius: radius_range,
+          mass: mass_range,
+          dens: density_range
+        },
+        aggregate: {
+          $bin: {dens: 250},
+          $collect: {
+            density_count: {$count: '*'},
+          },
+        },
+        out: 'density_distribution'
+      },
+      {
+        match: {
+          ra: ra_range,
+          dec: dec_range,
+          kepmag: mag_range,
+          teff: temp_range,
+          logg: grav_range,
+          feh: metal_range,
+          radius: radius_range,
+          mass: mass_range,
+          dens: density_range
+        },
+        aggregate: {
+          $bin: {feh: 250},
+          $collect: {
+            metallicity_count: {$count: '*'},
+          },
+        },
+        out: 'metallicity_distribution'
+      },
     ]).progress([
       {
         visualize: {
@@ -456,13 +597,73 @@ export default function() {
           height: 'radius_count'
         }
       },
+      {
+        visualize: {
+          id: 'planetsInSystem',
+          in: "planets",
+          mark: 'bar',
+          color: 'teal',
+          x: 'nconfp', 
+          height: 'planets_count'
+        }
+      },
+      {
+        visualize: {
+          id: 'KOIsInSystem',
+          in: "KOIs",
+          mark: 'bar',
+          color: 'teal',
+          x: 'nkoi', 
+          height: 'KOIs_count'
+        }
+      },
+      {
+        visualize: {
+          id: 'TCEsInSystem',
+          in: "TCEs",
+          mark: 'bar',
+          color: 'teal',
+          x: 'ntce', 
+          height: 'TCEs_count'
+        }
+      },
+      {
+        visualize: {
+          id: 'gravity_distribution',
+          in: "gravity_distribution",
+          mark: 'line',
+          color: 'teal',
+          x: 'logg', 
+          y: 'gravity_count'
+        }
+      },
+      {
+        visualize: {
+          id: 'density_distribution',
+          in: "density_distribution",
+          mark: 'line',
+          color: 'teal',
+          x: 'dens', 
+          y: 'density_count'
+        }
+      },
+      {
+        visualize: {
+          id: 'metallicity_distribution',
+          in: "metallicity_distribution",
+          mark: 'bar',
+          color: 'teal',
+          x: 'feh', 
+          height: 'metallicity_count'
+        }
+      },
     ])
     .interact([
       {
-        event: ['brush'], 
+        event: ['pan','zoom'], 
         from: 'coordinate_map', 
         response: {
-          radius_distribution: {selected: {color: 'orange'}}
+          hurr_durr: {}
         }
       },
     ])
@@ -493,7 +694,7 @@ export default function() {
     }
   }
   document.getElementById('start-button').onclick = () => {
-    window.scrollTo(0, 550)
+    window.scrollTo(0, 570)
     try {
       app.start();
     }
