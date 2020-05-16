@@ -118,6 +118,27 @@ export default function() {
     return density_range
   }
 
+  function getPlanets() {
+    //This method is invoked when the pipeline is started
+    let planets_range = [$("#planets-slider-range").slider("option", "values")[0], $("#planets-slider-range").slider("option", "values")[1]]
+    //console.log(planets_range)
+    return planets_range
+  }
+
+  function getKOIs() {
+    //This method is invoked when the pipeline is started
+    let KOIs_range = [$("#KOIs-slider-range").slider("option", "values")[0], $("#KOIs-slider-range").slider("option", "values")[1]]
+    //console.log(KOIs_range)
+    return KOIs_range
+  }
+
+  function getTCEs() {
+    //This method is invoked when the pipeline is started
+    let TCEs_range = [$("#TCEs-slider-range").slider("option", "values")[0], $("#TCEs-slider-range").slider("option", "values")[1]]
+    //console.log(TCEs_range)
+    return TCEs_range
+  }
+
   function disableButtonsAndSliders() {
     //upon confirming parameters, make all sliders and buttons inactive
     $( "#ra-slider-range" ).slider( "option", "disabled", true );
@@ -129,6 +150,9 @@ export default function() {
     $( "#radius-slider-range" ).slider( "option", "disabled", true );
     $( "#mass-slider-range" ).slider( "option", "disabled", true );
     $( "#density-slider-range" ).slider( "option", "disabled", true );
+    $( "#planets-slider-range" ).slider( "option", "disabled", true );
+    $( "#KOIs-slider-range" ).slider( "option", "disabled", true );
+    $( "#TCEs-slider-range" ).slider( "option", "disabled", true );
 
     document.getElementById("confirm-parameters-button").disabled = true;
     document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" disabled />`
@@ -148,6 +172,9 @@ export default function() {
     $( "#radius-slider-range" ).slider( "option", "disabled", false );
     $( "#mass-slider-range" ).slider( "option", "disabled", false );
     $( "#density-slider-range" ).slider( "option", "disabled", false );
+    $( "#planets-slider-range" ).slider( "option", "disabled", false );
+    $( "#KOIs-slider-range" ).slider( "option", "disabled", false );
+    $( "#TCEs-slider-range" ).slider( "option", "disabled", false );
 
     document.getElementById("confirm-parameters-button").disabled = false;
     document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" />`
@@ -239,6 +266,9 @@ export default function() {
     let radius_range = getRadius()
     let mass_range = getMass()
     let density_range = getDensity()
+    let planets_range = getPlanets()
+    let KOIs_range = getKOIs()
+    let TCEs_range = getTCEs()
 
     let mapDim = 925
     //define the views based on slider settings
@@ -321,7 +351,10 @@ export default function() {
           feh: metal_range,
           radius: radius_range,
           mass: mass_range,
-          dens: density_range
+          dens: density_range,
+          nconfp: planets_range,
+          nkoi: KOIs_range,
+          ntce: TCEs_range
         },
         aggregate: {
           $bin: [{ra: binSize[0]}, {dec: binSize[1]}],
@@ -341,7 +374,11 @@ export default function() {
           feh: metal_range,
           radius: radius_range,
           mass: mass_range,
-          dens: density_range
+          dens: density_range,
+          nconfp: planets_range,
+          nkoi: KOIs_range,
+          ntce: TCEs_range
+
         },
         aggregate: {
           $bin: {teff: 250},
@@ -364,7 +401,10 @@ export default function() {
           feh: metal_range,
           radius: radius_range,
           mass: mass_range,
-          dens: density_range
+          dens: density_range,
+          nconfp: planets_range,
+          nkoi: KOIs_range,
+          ntce: TCEs_range
         },
         aggregate: {
           $bin: {kepmag: 250},
@@ -387,7 +427,10 @@ export default function() {
           feh: metal_range,
           radius: radius_range,
           mass: mass_range,
-          dens: density_range
+          dens: density_range,
+          nconfp: planets_range,
+          nkoi: KOIs_range,
+          ntce: TCEs_range
         },
         aggregate: {
           $bin: {mass: 250},
@@ -410,7 +453,10 @@ export default function() {
           feh: metal_range,
           radius: radius_range,
           mass: mass_range,
-          dens: density_range
+          dens: density_range,
+          nconfp: planets_range,
+          nkoi: KOIs_range,
+          ntce: TCEs_range
         },
         aggregate: {
           $bin: {radius: 25},
@@ -433,7 +479,10 @@ export default function() {
           feh: metal_range,
           radius: radius_range,
           mass: mass_range,
-          dens: density_range
+          dens: density_range,
+          nconfp: planets_range,
+          nkoi: KOIs_range,
+          ntce: TCEs_range
         },
         aggregate: {
           $group: 'nconfp',
@@ -453,7 +502,10 @@ export default function() {
           feh: metal_range,
           radius: radius_range,
           mass: mass_range,
-          dens: density_range
+          dens: density_range,
+          nconfp: planets_range,
+          nkoi: KOIs_range,
+          ntce: TCEs_range
         },
         aggregate: {
           $group: 'nkoi',
@@ -473,7 +525,10 @@ export default function() {
           feh: metal_range,
           radius: radius_range,
           mass: mass_range,
-          dens: density_range
+          dens: density_range,
+          nconfp: planets_range,
+          nkoi: KOIs_range,
+          ntce: TCEs_range
         },
         aggregate: {
           $group: 'ntce',
@@ -493,7 +548,10 @@ export default function() {
           feh: metal_range,
           radius: radius_range,
           mass: mass_range,
-          dens: density_range
+          dens: density_range,
+          nconfp: planets_range,
+          nkoi: KOIs_range,
+          ntce: TCEs_range
         },
         aggregate: {
           $bin: {logg: 250},
@@ -513,7 +571,10 @@ export default function() {
           feh: metal_range,
           radius: radius_range,
           mass: mass_range,
-          dens: density_range
+          dens: density_range,
+          nconfp: planets_range,
+          nkoi: KOIs_range,
+          ntce: TCEs_range
         },
         aggregate: {
           $bin: {dens: 250},
@@ -533,7 +594,10 @@ export default function() {
           feh: metal_range,
           radius: radius_range,
           mass: mass_range,
-          dens: density_range
+          dens: density_range,
+          nconfp: planets_range,
+          nkoi: KOIs_range,
+          ntce: TCEs_range
         },
         aggregate: {
           $bin: {feh: 250},

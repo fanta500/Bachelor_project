@@ -3,7 +3,7 @@
   <style>
     .grid-container {
       display: grid;
-      grid-template: none / auto auto auto auto auto; /* syntax: size of first row / # of columns defined by how many arguments here */
+      grid-template: none / auto auto auto auto; /* syntax: size of first row / # of columns defined by how many arguments here */
       grid-gap: 30px; /* gap between grid elements */
       background-color: rgb(255, 255, 255); /* container background */
       padding: 30px; /* outer padding of container */
@@ -104,6 +104,30 @@
         <input type="text" id="density_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
       </p>
       <div id="density-slider-range" style="width: auto;"></div>
+    </div>
+
+    <div>
+      <p>
+        <label for="planets_range" style="font-size: 14px;">Confirmed planets in system:</label>
+        <input type="text" id="planets_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="planets-slider-range" style="width: auto;"></div>
+    </div>
+    
+    <div>
+      <p>
+        <label for="KOIs_range" style="font-size: 14px;">Kepler Objects of Interest in system:</label>
+        <input type="text" id="KOIs_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="KOIs-slider-range" style="width: auto;"></div>
+    </div>
+
+    <div>
+      <p>
+        <label for="TCEs_range" style="font-size: 14px;">Threshold Crossing Events in system:</label>
+        <input type="text" id="TCEs_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="TCEs-slider-range" style="width: auto;"></div>
     </div>
     
   </div>

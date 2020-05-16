@@ -169,4 +169,61 @@ export default function() {
     $( "#density_min" ).val($( "#density-slider-range" ).slider( "values", 0 ));
     $( "#density_max" ).val($( "#density-slider-range" ).slider( "values", 1 ));
   } );
+
+  $( function() {
+    $( "#planets-slider-range" ).slider({
+      range: true,
+      min: 0,
+      max: 8,
+      values: [ 0, 8 ],
+      step: 1,
+      slide: function( event, ui ) {
+      $( "#planets_range" ).val( ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+      $( "#planets_min" ).val(ui.values[ 0 ]);
+      $( "#planets_max" ).val(ui.values[ 1 ]);
+    }
+  });
+    $( "#planets_range" ).val( $( "#planets-slider-range" ).slider( "values", 0 ) +
+    " - " + $( "#planets-slider-range" ).slider( "values", 1 ) );
+    $( "#planets_min" ).val($( "#planets-slider-range" ).slider( "values", 0 ));
+    $( "#planets_max" ).val($( "#planets-slider-range" ).slider( "values", 1 ));
+  } );
+
+  $( function() {
+    $( "#KOIs-slider-range" ).slider({
+      range: true,
+      min: 0,
+      max: 7,
+      values: [ 0, 7 ],
+      step: 1,
+      slide: function( event, ui ) {
+      $( "#KOIs_range" ).val( ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+      $( "#KOIs_min" ).val(ui.values[ 0 ]);
+      $( "#KOIs_max" ).val(ui.values[ 1 ]);
+    }
+  });
+    $( "#KOIs_range" ).val( $( "#KOIs-slider-range" ).slider( "values", 0 ) +
+    " - " + $( "#KOIs-slider-range" ).slider( "values", 1 ) );
+    $( "#KOIs_min" ).val($( "#KOIs-slider-range" ).slider( "values", 0 ));
+    $( "#KOIs_max" ).val($( "#KOIs-slider-range" ).slider( "values", 1 ));
+  } );
+
+  $( function() {
+    $( "#TCEs-slider-range" ).slider({
+      range: true,
+      min: 0,
+      max: 10,
+      values: [ 0, 10 ],
+      step: 1,
+      slide: function( event, ui ) {
+      $( "#TCEs_range" ).val( ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+      $( "#TCEs_min" ).val(ui.values[ 0 ]);
+      $( "#TCEs_max" ).val(ui.values[ 1 ]);
+    }
+  });
+    $( "#TCEs_range" ).val( $( "#TCEs-slider-range" ).slider( "values", 0 ) +
+    " - " + $( "#TCEs-slider-range" ).slider( "values", 1 ) );
+    $( "#TCEs_min" ).val($( "#TCEs-slider-range" ).slider( "values", 0 ));
+    $( "#TCEs_max" ).val($( "#TCEs-slider-range" ).slider( "values", 1 ));
+  } );
 }
