@@ -158,7 +158,7 @@ export default function() {
 
   let config = {
     container: "pv-vis",
-    viewport: [1850, 4000],
+    viewport: [1850, 2500],
     profiling: true
   }
 
@@ -658,15 +658,15 @@ export default function() {
         }
       },
     ])
-    .interact([
-      {
-        event: ['pan','zoom'], 
-        from: 'coordinate_map', 
-        response: {
-          hurr_durr: {}
-        }
-      },
-    ])
+    // .interact([
+    //   {
+    //     event: ['brush'], 
+    //     from: 'coordinate_map', 
+    //     response: {
+    //       KOIsInSystem: {}
+    //     }
+    //   },
+    // ])
     // .annotate([
     //   {
     //     id: 'temp_distribution',
