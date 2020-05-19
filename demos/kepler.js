@@ -286,6 +286,7 @@ export default function() {
         id: 'temp_distribution', offset: [mapDim, 5],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 455, height: 455,
+        xAxis: {ticks: 6}
       },
       {
         id: 'mag_distribution', offset: [mapDim+455, 5],
@@ -302,10 +303,10 @@ export default function() {
         id: 'radius_distribution', offset: [mapDim+455, 460],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 455, height: 455,
-        gridlines: {x: true, y: true},
-        profiling: true,
-        legend: true,
-        xAxis: {ticks: 16}
+        // gridlines: {x: true, y: true},
+        // profiling: true,
+        // legend: true,
+        xAxis: {ticks: 6}
       },
       // row 1 below map
       {
@@ -338,6 +339,11 @@ export default function() {
         id: 'metallicity_distribution', offset: [2*600+50, mapDim+50+500],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 600, height: 500,
+      },
+      {
+        id: 'temp_mag_mass_radius', offset: [50, mapDim+50+500+500],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 600*3-50, height: 500,
       },
     ]
 
@@ -612,6 +618,29 @@ export default function() {
         },
         out: 'metallicity_distribution'
       },
+      {
+        match: {
+          ra: ra_range,
+          dec: dec_range,
+          kepmag: mag_range,
+          teff: temp_range,
+          logg: grav_range,
+          feh: metal_range,
+          radius: radius_range,
+          mass: mass_range,
+          dens: density_range,
+          nconfp: planets_range,
+          nkoi: KOIs_range,
+          ntce: TCEs_range
+        },
+        aggregate: {
+          $group: ['kepmag', 'teff', 'radius', 'mass'],
+          $collect: {
+            multiview: {$count: '*'},
+          },
+        },
+        out: 'temp_mag_mass_radius'
+      },
     ]).progress([
       {
         visualize: {
@@ -630,7 +659,7 @@ export default function() {
         visualize: {
           id: 'temp_distribution',
           in: "temp_distribution",
-          mark: 'line',
+          mark: 'Spline',
           color: 'teal',
           x: 'teff', 
           y: 'temp_count'
@@ -660,9 +689,8 @@ export default function() {
         visualize: {
           id: 'radius_distribution',
           in: "radius_distribution",
-          mark: 'line',
+          mark: 'Spline',
           color: 'teal',
-          size: 24,
           x: 'radius',
           y:'radius_count'
         }
@@ -727,14 +755,25 @@ export default function() {
           height: 'metallicity_count'
         }
       },
-    ])
-    .interact([
       {
-        event: ['hover'], 
-        from: 'radius_distribution', 
-        export: {}
+        visualize: {
+          id: 'temp_mag_mass_radius',
+          in: "temp_mag_mass_radius",
+          mark: 'line',
+          color: 'teal',
+          opacity: 0.1,
+          y: ['teff', 'kepmag', 'mass', 'radius'], 
+          
+        }
       },
     ])
+    // .interact([
+    //   {
+    //     event: ['hover'], 
+    //     from: 'radius_distribution', 
+    //     export: {}
+    //   },
+    // ])
     // .annotate([
     //   {
     //     id: 'temp_distribution',
