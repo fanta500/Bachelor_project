@@ -278,6 +278,8 @@ export default function() {
         id: 'coordinate_map', offset: [0,0],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: mapDim, height: mapDim,
+        legend: true,
+        profiling: true
       },
       // row 1 right of map
       {
@@ -300,6 +302,10 @@ export default function() {
         id: 'radius_distribution', offset: [mapDim+455, 460],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 455, height: 455,
+        gridlines: {x: true, y: true},
+        profiling: true,
+        legend: true,
+        xAxis: {ticks: 16}
       },
       // row 1 below map
       {
@@ -334,7 +340,6 @@ export default function() {
         width: 600, height: 500,
       },
     ]
-
 
     disableButtonsAndSliders()
     
@@ -459,7 +464,7 @@ export default function() {
           ntce: TCEs_range
         },
         aggregate: {
-          $bin: {radius: 25},
+          $bin: {radius: 300},
           $collect: {
             radius_count: {$count: '*'},
             radius_min: {$max: '*'},
@@ -655,10 +660,11 @@ export default function() {
         visualize: {
           id: 'radius_distribution',
           in: "radius_distribution",
-          mark: 'bar',
+          mark: 'line',
           color: 'teal',
-          x: 'radius', 
-          height: 'radius_count'
+          size: 24,
+          x: 'radius',
+          y:'radius_count'
         }
       },
       {
@@ -722,15 +728,13 @@ export default function() {
         }
       },
     ])
-    // .interact([
-    //   {
-    //     event: ['brush'], 
-    //     from: 'coordinate_map', 
-    //     response: {
-    //       KOIsInSystem: {}
-    //     }
-    //   },
-    // ])
+    .interact([
+      {
+        event: ['hover'], 
+        from: 'radius_distribution', 
+        export: {}
+      },
+    ])
     // .annotate([
     //   {
     //     id: 'temp_distribution',
