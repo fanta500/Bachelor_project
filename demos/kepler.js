@@ -55,6 +55,51 @@ export default function() {
     return [raRatio*1024, decRatio*1024]
   }
 
+  function calculateBinSizeFactor(atr) {
+    let atrMaxRange;
+    let atrCurrRange;
+    let atrRatio;
+
+    switch (atr) {
+      case "mag":
+        atrMaxRange = $("#mag-slider-range").slider("option", "max") - $("#mag-slider-range").slider("option", "min")
+        atrCurrRange = getMagnitude()[1] - getMagnitude()[0]
+        atrRatio = atrCurrRange / atrMaxRange
+        return atrRatio
+      case "temp":
+        atrMaxRange = $("#temp-slider-range").slider("option", "max") - $("#temp-slider-range").slider("option", "min")
+        atrCurrRange = getSurfTemp()[1] - getSurfTemp()[0]
+        atrRatio = atrCurrRange / atrMaxRange
+        console.log(atrRatio)
+        return atrRatio
+      case "grav":
+        atrMaxRange = $("#grav-slider-range").slider("option", "max") - $("#grav-slider-range").slider("option", "min")
+        atrCurrRange = getSurfGrav()[1] - getSurfGrav()[0]
+        atrRatio = atrCurrRange / atrMaxRange
+        return atrRatio
+      case "metallicity":
+        atrMaxRange = $("#metallicity-slider-range").slider("option", "max") - $("#metallicity-slider-range").slider("option", "min")
+        atrCurrRange = getMetallicity()[1] - getMetallicity()[0]
+        atrRatio = atrCurrRange / atrMaxRange
+        return atrRatio
+      case "radius":
+        atrMaxRange = $("#radius-slider-range").slider("option", "max") - $("#radius-slider-range").slider("option", "min")
+        atrCurrRange = getRadius()[1] - getRadius()[0]
+        atrRatio = atrCurrRange / atrMaxRange
+        return atrRatio
+      case "mass":
+        atrMaxRange = $("#mass-slider-range").slider("option", "max") - $("#mass-slider-range").slider("option", "min")
+        atrCurrRange = getMass()[1] - getMass()[0]
+        atrRatio = atrCurrRange / atrMaxRange
+        return atrRatio
+      case "density":
+        atrMaxRange = $("#density-slider-range").slider("option", "max") - $("#density-slider-range").slider("option", "min")
+        atrCurrRange = getDensity()[1] - getDensity()[0]
+        atrRatio = atrCurrRange / atrMaxRange
+        return atrRatio
+    }
+  }
+
   function getRightAscension() {
     //This method is invoked when the pipeline is started
     let ra_range = [$("#ra-slider-range").slider("option", "values")[0], $("#ra-slider-range").slider("option", "values")[1]]
@@ -156,9 +201,12 @@ export default function() {
 
     document.getElementById("confirm-parameters-button").disabled = true;
     document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" disabled />`
+    document.getElementById('GPU-settings').disabled = true;
     //don't allow pressing of start until parameters are confirmed
     document.getElementById("start-button").disabled = false
     document.getElementById("next-button").disabled = false
+
+
   }
 
   function enableButtonsAndSliders() {
@@ -286,13 +334,15 @@ export default function() {
         id: 'temp_distribution', offset: [mapDim, 5],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 455, height: 455,
-        xAxis: {ticks: 6},
-        yAxis: {ticks: 6}
       },
       {
         id: 'mag_distribution', offset: [mapDim+455, 5],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 455, height: 455,
+        xAxis: {
+          scale: 'power',
+          exponent: 0.1
+        }
       },
       // row 2 right of map
       {
@@ -304,26 +354,29 @@ export default function() {
         id: 'radius_distribution', offset: [mapDim+455, 460],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 455, height: 455,
-        // gridlines: {x: true, y: true},
-        // profiling: true,
-        // legend: true,
-        xAxis: {ticks: 6}
+        xAxis: {
+          scale: 'power',
+          exponent: 0.1
+        },
       },
       // row 1 below map
       {
         id: 'planetsInSystem', offset: [50, mapDim+50],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 600, height: 500,
+        legend: true
       },
       {
         id: 'KOIsInSystem', offset: [600+50, mapDim+50],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 600, height: 500,
+        legend: true
       },
       {
         id: 'TCEsInSystem', offset: [2*600+50, mapDim+50],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 600, height: 500,
+        legend: true
       },
       // row 2 below map
       {
@@ -366,11 +419,11 @@ export default function() {
         aggregate: {
           $bin: [{ra: binSize[0]}, {dec: binSize[1]}],
           $collect: {
-            map_values: {$count: '*'}
+            star_count: {$count: '*'},
           },
         },
         out: 'coordinate_map'
-      },  
+      },
       {
         match: {
           ra: ra_range,
@@ -388,7 +441,7 @@ export default function() {
 
         },
         aggregate: {
-          $bin: {teff: 250},
+          $bin: {teff: Math.ceil(150*calculateBinSizeFactor("temp"))},
           $collect: {
             temp_count: {$count: '*'},
             temp_min: {$max: '*'},
@@ -607,7 +660,8 @@ export default function() {
           ntce: TCEs_range
         },
         aggregate: {
-          $bin: {feh: 250},
+          // $group: 'feh',
+          $bin: {feh: 50},
           $collect: {
             metallicity_count: {$count: '*'},
           },
@@ -619,9 +673,9 @@ export default function() {
         visualize: {
           id: 'coordinate_map',
           in: 'coordinate_map',
-          mark: 'rectangle',
+          mark: 'rect',
           color: {
-            field: 'map_values',
+            field: 'star_count',
             exponent: '0.25'
           },
           x: 'ra', 
@@ -663,6 +717,10 @@ export default function() {
           id: 'radius_distribution',
           in: "radius_distribution",
           mark: 'line',
+          // color: {
+          //   field: 'radius_count',
+          //   exponent: 0.25
+          // },
           color: 'teal',
           x: 'radius',
           y:'radius_count'
@@ -673,7 +731,10 @@ export default function() {
           id: 'planetsInSystem',
           in: "planets",
           mark: 'bar',
-          color: 'teal',
+          color: {
+            field: 'planets_count',
+            exponent: 0.1
+          },
           x: 'nconfp', 
           height: 'planets_count'
         }
@@ -683,7 +744,10 @@ export default function() {
           id: 'KOIsInSystem',
           in: "KOIs",
           mark: 'bar',
-          color: 'teal',
+          color: {
+            field: 'KOIs_count',
+            exponent: 0.1
+          },
           x: 'nkoi', 
           height: 'KOIs_count'
         }
@@ -693,7 +757,10 @@ export default function() {
           id: 'TCEsInSystem',
           in: "TCEs",
           mark: 'bar',
-          color: 'teal',
+          color: {
+            field: 'TCEs_count',
+            exponent: 0.1
+          },
           x: 'ntce', 
           height: 'TCEs_count'
         }
@@ -729,23 +796,30 @@ export default function() {
         }
       },
     ])
-    // .interact([
-    //   {
-    //     event: 'brush', 
-    //     from: 'coordinate_map', 
-    //     response: {
-    //       planetsInSystem: {selected: {color: 'orange'}}
-    //     }
-    //   },
-    // ])
+    .interact([
+      // {
+      //   event: ['zoom'], 
+      //   from: 'coordinate_map', 
+      //   response: {
+      //     map_tight: {}
+      //   }
+      // },
+      {
+        event: 'click', 
+        from: 'planetsInSystem', 
+        response: {
+          planetsInSystem: {selected: {color: 'orange'}}
+        }
+      },
+    ])
     .onEach(function() {
       let progress = (((n * batchSize) / datasetSize) * 100)
       progress = (progress > 100 ? progress = 100 : progress = progress)
       document.getElementById('stats').innerHTML = 'DATA PROCESSED: ' + progress.toFixed(2) + ' %';
       n += 1
-      if (progress === 100) {
-        enableButtonsAndSliders()
-      }
+      // if (progress === 100) {
+      //   enableButtonsAndSliders()
+      // }
     })
   }
     
