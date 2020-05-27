@@ -70,7 +70,6 @@ export default function() {
         atrMaxRange = $("#temp-slider-range").slider("option", "max") - $("#temp-slider-range").slider("option", "min")
         atrCurrRange = getSurfTemp()[1] - getSurfTemp()[0]
         atrRatio = atrCurrRange / atrMaxRange
-        console.log(atrRatio)
         return atrRatio
       case "grav":
         atrMaxRange = $("#grav-slider-range").slider("option", "max") - $("#grav-slider-range").slider("option", "min")
@@ -334,14 +333,16 @@ export default function() {
         id: 'temp_distribution', offset: [mapDim, 5],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 455, height: 455,
+        xAxis: {
+          ticks: 10,
+        }
       },
       {
         id: 'mag_distribution', offset: [mapDim+455, 5],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 455, height: 455,
         xAxis: {
-          scale: 'power',
-          exponent: 0.1
+          ticks: 10,
         }
       },
       // row 2 right of map
@@ -349,14 +350,16 @@ export default function() {
         id: 'mass_distribution', offset: [mapDim, 460],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 455, height: 455,
+        xAxis: {
+          ticks: 10
+        }
       },
       {
         id: 'radius_distribution', offset: [mapDim+455, 460],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 455, height: 455,
         xAxis: {
-          scale: 'power',
-          exponent: 0.1
+          ticks: 10,
         },
       },
       // row 1 below map
@@ -376,23 +379,32 @@ export default function() {
         id: 'TCEsInSystem', offset: [2*600+50, mapDim+50],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 600, height: 500,
-        legend: true
+        // legend: true
       },
       // row 2 below map
       {
         id: 'gravity_distribution', offset: [50, mapDim+50+500],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 600, height: 500,
+        xAxis: {
+          ticks: 10
+        }
       },
       {
         id: 'density_distribution', offset: [600+50, mapDim+50+500],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 600, height: 500,
+        xAxis: {
+          ticks: 10
+        }
       },
       {
         id: 'metallicity_distribution', offset: [2*600+50, mapDim+50+500],
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 600, height: 500,
+        xAxis: {
+          ticks: 10
+        }
       },
     ]
 
@@ -437,16 +449,17 @@ export default function() {
           dens: density_range,
           nconfp: planets_range,
           nkoi: KOIs_range,
-          ntce: TCEs_range
-
+          ntce: TCEs_range,
+          st_delivname: {$in: ['durr']}
         },
         aggregate: {
           $bin: {teff: Math.ceil(150*calculateBinSizeFactor("temp"))},
+          // $group: 'teff',
           $collect: {
-            temp_count: {$count: '*'},
-            temp_min: {$max: '*'},
-            temp_max: {$min: '*'},
-            temp_avg: {$avg: '*'}
+            temp_count: {$count: 'teff'},
+            temp_min: {$max: 'teff'},
+            temp_max: {$min: 'teff'},
+            temp_avg: {$avg: 'teff'}
           },
         },
         out: 'temp_distribution'
@@ -661,7 +674,7 @@ export default function() {
         },
         aggregate: {
           // $group: 'feh',
-          $bin: {feh: 50},
+          $bin: {feh: 100},
           $collect: {
             metallicity_count: {$count: '*'},
           },
@@ -673,7 +686,7 @@ export default function() {
         visualize: {
           id: 'coordinate_map',
           in: 'coordinate_map',
-          mark: 'rect',
+          mark: 'dot',
           color: {
             field: 'star_count',
             exponent: '0.25'
@@ -686,17 +699,18 @@ export default function() {
         visualize: {
           id: 'temp_distribution',
           in: "temp_distribution",
-          mark: 'line',
+          mark: 'spline',
           color: 'teal',
           x: 'teff', 
-          y: 'temp_count'
+          y: 'temp_count',
+
         }
       },
       {
         visualize: {
           id: 'mag_distribution',
           in: "mag_distribution",
-          mark: 'line',
+          mark: 'spline',
           color: 'teal',
           x: 'kepmag', 
           y: 'mag_count'
@@ -706,7 +720,7 @@ export default function() {
         visualize: {
           id: 'mass_distribution',
           in: "mass_distribution",
-          mark: 'line',
+          mark: 'spline',
           color: 'teal',
           x: 'mass', 
           y: 'mass_count'
@@ -722,6 +736,10 @@ export default function() {
           //   exponent: 0.25
           // },
           color: 'teal',
+          // x: {
+          //   field: 'radius',
+          //   logScale: true,
+          // },
           x: 'radius',
           y:'radius_count'
         }
@@ -731,12 +749,13 @@ export default function() {
           id: 'planetsInSystem',
           in: "planets",
           mark: 'bar',
-          color: {
-            field: 'planets_count',
-            exponent: 0.1
-          },
+          // color: {
+          //   field: 'planets_count',
+          //   exponent: 0.1
+          // },
+          color: 'orange',
           x: 'nconfp', 
-          height: 'planets_count'
+          height: 'planets_count',
         }
       },
       {
@@ -769,7 +788,7 @@ export default function() {
         visualize: {
           id: 'gravity_distribution',
           in: "gravity_distribution",
-          mark: 'line',
+          mark: 'spline',
           color: 'teal',
           x: 'logg', 
           y: 'gravity_count'
@@ -779,7 +798,7 @@ export default function() {
         visualize: {
           id: 'density_distribution',
           in: "density_distribution",
-          mark: 'line',
+          mark: 'spline',
           color: 'teal',
           x: 'dens', 
           y: 'density_count'
@@ -789,29 +808,29 @@ export default function() {
         visualize: {
           id: 'metallicity_distribution',
           in: "metallicity_distribution",
-          mark: 'bar',
+          mark: 'spline',
           color: 'teal',
           x: 'feh', 
-          height: 'metallicity_count'
+          y: 'metallicity_count'
         }
       },
     ])
-    .interact([
-      // {
-      //   event: ['zoom'], 
-      //   from: 'coordinate_map', 
-      //   response: {
-      //     map_tight: {}
-      //   }
-      // },
-      {
-        event: 'click', 
-        from: 'planetsInSystem', 
-        response: {
-          planetsInSystem: {selected: {color: 'orange'}}
-        }
-      },
-    ])
+    // .interact([
+    //   {
+    //     event: ['zoom'], 
+    //     from: 'coordinate_map', 
+    //     response: {
+    //       map_tight: {}
+    //     }
+    //   },
+    //   {
+    //     event: 'click', 
+    //     from: 'planetsInSystem', 
+    //     response: {
+    //       planetsInSystem: {selected: {color: 'orange'}}
+    //     }
+    //   },
+    // ])
     .onEach(function() {
       let progress = (((n * batchSize) / datasetSize) * 100)
       progress = (progress > 100 ? progress = 100 : progress = progress)
