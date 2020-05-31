@@ -226,4 +226,16 @@ export default function() {
     $( "#TCEs_min" ).val($( "#TCEs-slider-range" ).slider( "values", 0 ));
     $( "#TCEs_max" ).val($( "#TCEs-slider-range" ).slider( "values", 1 ));
   } );
+
+  $( function() {
+    $( "#resolution_slider" ).slider({
+      range: "min",
+      min: 1,
+      value: 100,
+      slide: function( event, ui ) {
+      $( "#resolution_slider_value" ).val( ui.value + " %");
+    }
+  });
+    $( "#resolution_slider_value" ).val( $( "#resolution_slider" ).slider( "value") + " %");
+  } );
 }

@@ -52,7 +52,7 @@ export default function() {
     let decRatio = decCurrRange / decMaxRange
 
     //console.log(raRatio, "    ", decRatio)
-    return [raRatio*1024, decRatio*1024]
+    return [raRatio*2048*2, decRatio*2048*2]
   }
 
   function calculateBinSizeFactor(atr) {
@@ -183,6 +183,10 @@ export default function() {
     return TCEs_range
   }
 
+  function getResolution() {
+    return $("#resolution_slider").slider("value")/100
+  }
+
   function disableButtonsAndSliders() {
     //upon confirming parameters, make all sliders and buttons inactive
     $( "#ra-slider-range" ).slider( "option", "disabled", true );
@@ -197,6 +201,7 @@ export default function() {
     $( "#planets-slider-range" ).slider( "option", "disabled", true );
     $( "#KOIs-slider-range" ).slider( "option", "disabled", true );
     $( "#TCEs-slider-range" ).slider( "option", "disabled", true );
+    $( "#resolution_slider" ).slider( "option", "disabled", true );
 
     document.getElementById("confirm-parameters-button").disabled = true;
     document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" disabled />`
@@ -222,6 +227,7 @@ export default function() {
     $( "#planets-slider-range" ).slider( "option", "disabled", false );
     $( "#KOIs-slider-range" ).slider( "option", "disabled", false );
     $( "#TCEs-slider-range" ).slider( "option", "disabled", false );
+    $( "#resolution_slider" ).slider( "option", "disabled", false );
 
     document.getElementById("confirm-parameters-button").disabled = false;
     document.getElementById('p5-control').innerHTML = `<input type="file" id="input-file" />`
@@ -299,8 +305,108 @@ export default function() {
         ntce: 'int',
         st_quarters: 'int',
         st_vet_date_str: 'string',
-      }
+      },
     });
+
+    let mapDim = 925
+    //define the views based on slider settings
+    let views = [
+      // the map
+      {
+        id: 'coordinate_map', offset: [0,0],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: mapDim, height: mapDim,
+        legend: true,
+        profiling: true
+      },
+      //row 1 right of map
+      {
+        id: 'temp_distribution', offset: [mapDim, 5],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 455, height: 455,
+        xAxis: {
+          ticks: 5,
+        },
+        gridlines: {y: true}
+      },
+      {
+        id: 'mag_distribution', offset: [mapDim+455, 5],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 455, height: 455,
+        xAxis: {
+          ticks: 5,
+        },
+        gridlines: {y: true}
+      },
+      // row 2 right of map
+      {
+        id: 'mass_distribution', offset: [mapDim, 460],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 455, height: 455,
+        xAxis: {
+          ticks: 10
+        },
+        gridlines: {y: true}
+      },
+      {
+        id: 'radius_distribution', offset: [mapDim+455, 460],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 455, height: 455,
+        xAxis: {
+          ticks: 5,
+        },
+        gridlines: {y: true}
+      },
+      // row 1 below map
+      {
+        id: 'planetsInSystem', offset: [50, mapDim+50],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 600, height: 500,
+        gridlines: {y: true}
+      },
+      {
+        id: 'KOIsInSystem', offset: [600+50, mapDim+50],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 600, height: 500,
+        gridlines: {y: true}
+      },
+      {
+        id: 'TCEsInSystem', offset: [2*600+50, mapDim+50],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 600, height: 500,
+        gridlines: {y: true}
+      },
+      // row 2 below map
+      {
+        id: 'gravity_distribution', offset: [50, mapDim+50+500],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 600, height: 500,
+        xAxis: {
+          ticks: 10
+        },
+        gridlines: {y: true}
+      },
+      {
+        id: 'density_distribution', offset: [600+50, mapDim+50+500],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 600, height: 500,
+        xAxis: {
+          ticks: 10
+        },
+        gridlines: {y: true}
+      },
+      {
+        id: 'metallicity_distribution', offset: [2*600+50, mapDim+50+500],
+        padding: {left: 80, right: 10, top: 10, bottom: 60},
+        width: 600, height: 500,
+        xAxis: {
+          ticks: 10
+        },
+        gridlines: {y: true}
+      },
+    ]
+
+    disableButtonsAndSliders()
     
     let ra_range = getRightAscension()
     let dec_range = getDecline()
@@ -316,100 +422,7 @@ export default function() {
     let planets_range = getPlanets()
     let KOIs_range = getKOIs()
     let TCEs_range = getTCEs()
-
-    let mapDim = 925
-    //define the views based on slider settings
-    let views = [
-      // the map
-      {
-        id: 'coordinate_map', offset: [0,0],
-        padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: mapDim, height: mapDim,
-        legend: true,
-        profiling: true
-      },
-      // row 1 right of map
-      {
-        id: 'temp_distribution', offset: [mapDim, 5],
-        padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 455, height: 455,
-        xAxis: {
-          ticks: 10,
-        }
-      },
-      {
-        id: 'mag_distribution', offset: [mapDim+455, 5],
-        padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 455, height: 455,
-        xAxis: {
-          ticks: 10,
-        }
-      },
-      // row 2 right of map
-      {
-        id: 'mass_distribution', offset: [mapDim, 460],
-        padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 455, height: 455,
-        xAxis: {
-          ticks: 10
-        }
-      },
-      {
-        id: 'radius_distribution', offset: [mapDim+455, 460],
-        padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 455, height: 455,
-        xAxis: {
-          ticks: 10,
-        },
-      },
-      // row 1 below map
-      {
-        id: 'planetsInSystem', offset: [50, mapDim+50],
-        padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 600, height: 500,
-        legend: true
-      },
-      {
-        id: 'KOIsInSystem', offset: [600+50, mapDim+50],
-        padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 600, height: 500,
-        legend: true
-      },
-      {
-        id: 'TCEsInSystem', offset: [2*600+50, mapDim+50],
-        padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 600, height: 500,
-        // legend: true
-      },
-      // row 2 below map
-      {
-        id: 'gravity_distribution', offset: [50, mapDim+50+500],
-        padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 600, height: 500,
-        xAxis: {
-          ticks: 10
-        }
-      },
-      {
-        id: 'density_distribution', offset: [600+50, mapDim+50+500],
-        padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 600, height: 500,
-        xAxis: {
-          ticks: 10
-        }
-      },
-      {
-        id: 'metallicity_distribution', offset: [2*600+50, mapDim+50+500],
-        padding: {left: 80, right: 10, top: 10, bottom: 60},
-        width: 600, height: 500,
-        xAxis: {
-          ticks: 10
-        }
-      },
-    ]
-
-    disableButtonsAndSliders()
-    
+    let resolution = getResolution()
 
     app.view(views)
     app.batch([
@@ -429,7 +442,7 @@ export default function() {
           ntce: TCEs_range
         },
         aggregate: {
-          $bin: [{ra: binSize[0]}, {dec: binSize[1]}],
+          $bin: [{ra: Math.ceil(binSize[0]*resolution)}, {dec: Math.ceil(binSize[1]*resolution)}],
           $collect: {
             star_count: {$count: '*'},
           },
@@ -450,16 +463,11 @@ export default function() {
           nconfp: planets_range,
           nkoi: KOIs_range,
           ntce: TCEs_range,
-          st_delivname: {$in: ['durr']}
         },
         aggregate: {
           $bin: {teff: Math.ceil(150*calculateBinSizeFactor("temp"))},
-          // $group: 'teff',
           $collect: {
             temp_count: {$count: 'teff'},
-            temp_min: {$max: 'teff'},
-            temp_max: {$min: 'teff'},
-            temp_avg: {$avg: 'teff'}
           },
         },
         out: 'temp_distribution'
@@ -480,12 +488,9 @@ export default function() {
           ntce: TCEs_range
         },
         aggregate: {
-          $bin: {kepmag: 250},
+          $bin: {kepmag: Math.ceil(150*calculateBinSizeFactor("mag"))},
           $collect: {
-            mag_count: {$count: '*'},
-            mag_min: {$max: '*'},
-            mag_max: {$min: '*'},
-            mag_avg: {$avg: '*'}
+            mag_count: {$count: 'kepmag'},
           },
         },
         out: 'mag_distribution'
@@ -506,12 +511,9 @@ export default function() {
           ntce: TCEs_range
         },
         aggregate: {
-          $bin: {mass: 250},
+          $bin: {mass: Math.ceil(150*calculateBinSizeFactor("mass"))},
           $collect: {
-            mass_count: {$count: '*'},
-            mass_min: {$max: '*'},
-            mass_max: {$min: '*'},
-            mass_avg: {$avg: '*'}
+            mass_count: {$count: 'mass'},
           },
         },
         out: 'mass_distribution'
@@ -532,12 +534,9 @@ export default function() {
           ntce: TCEs_range
         },
         aggregate: {
-          $bin: {radius: 300},
+          $bin: {radius: Math.ceil(150*calculateBinSizeFactor("radius"))},
           $collect: {
-            radius_count: {$count: '*'},
-            radius_min: {$max: '*'},
-            radius_max: {$min: '*'},
-            radius_avg: {$avg: '*'}
+            radius_count: {$count: 'radius'},
           },
         },
         out: 'radius_distribution'
@@ -560,7 +559,7 @@ export default function() {
         aggregate: {
           $group: 'nconfp',
           $collect: {
-            planets_count: {$count: '*'},
+            planets_count: {$count: 'nconfp'},
           },
         },
         out: 'planets'
@@ -583,7 +582,7 @@ export default function() {
         aggregate: {
           $group: 'nkoi',
           $collect: {
-            KOIs_count: {$count: '*'},
+            KOIs_count: {$count: 'nkoi'},
           },
         },
         out: 'KOIs'
@@ -606,7 +605,7 @@ export default function() {
         aggregate: {
           $group: 'ntce',
           $collect: {
-            TCEs_count: {$count: '*'},
+            TCEs_count: {$count: 'ntce'},
           },
         },
         out: 'TCEs'
@@ -627,9 +626,9 @@ export default function() {
           ntce: TCEs_range
         },
         aggregate: {
-          $bin: {logg: 250},
+          $bin: {logg: Math.ceil(150*calculateBinSizeFactor("grav"))},
           $collect: {
-            gravity_count: {$count: '*'},
+            gravity_count: {$count: 'logg'},
           },
         },
         out: 'gravity_distribution'
@@ -650,9 +649,9 @@ export default function() {
           ntce: TCEs_range
         },
         aggregate: {
-          $bin: {dens: 250},
+          $bin: {dens: Math.ceil(150*calculateBinSizeFactor("density"))},
           $collect: {
-            density_count: {$count: '*'},
+            density_count: {$count: 'dens'},
           },
         },
         out: 'density_distribution'
@@ -673,10 +672,9 @@ export default function() {
           ntce: TCEs_range
         },
         aggregate: {
-          // $group: 'feh',
-          $bin: {feh: 100},
+          $bin: {feh: Math.ceil(150*calculateBinSizeFactor("metallicity"))},
           $collect: {
-            metallicity_count: {$count: '*'},
+            metallicity_count: {$count: 'feh'},
           },
         },
         out: 'metallicity_distribution'
@@ -686,7 +684,7 @@ export default function() {
         visualize: {
           id: 'coordinate_map',
           in: 'coordinate_map',
-          mark: 'dot',
+          mark: 'rect',
           color: {
             field: 'star_count',
             exponent: '0.25'
@@ -701,7 +699,7 @@ export default function() {
           in: "temp_distribution",
           mark: 'spline',
           color: 'teal',
-          x: 'teff', 
+          x: 'teff',
           y: 'temp_count',
 
         }
@@ -730,18 +728,10 @@ export default function() {
         visualize: {
           id: 'radius_distribution',
           in: "radius_distribution",
-          mark: 'line',
-          // color: {
-          //   field: 'radius_count',
-          //   exponent: 0.25
-          // },
+          mark: 'spline',
           color: 'teal',
-          // x: {
-          //   field: 'radius',
-          //   logScale: true,
-          // },
           x: 'radius',
-          y:'radius_count'
+          y: 'radius_count'
         }
       },
       {
@@ -749,11 +739,10 @@ export default function() {
           id: 'planetsInSystem',
           in: "planets",
           mark: 'bar',
-          // color: {
-          //   field: 'planets_count',
-          //   exponent: 0.1
-          // },
-          color: 'orange',
+          color: {
+            field: 'planets_count',
+            exponent: 0.1
+          },
           x: 'nconfp', 
           height: 'planets_count',
         }
@@ -817,17 +806,10 @@ export default function() {
     ])
     // .interact([
     //   {
-    //     event: ['zoom'], 
-    //     from: 'coordinate_map', 
+    //     event: ['pan','zoom'], 
+    //     from: 'temp_distribution', 
     //     response: {
-    //       map_tight: {}
-    //     }
-    //   },
-    //   {
-    //     event: 'click', 
-    //     from: 'planetsInSystem', 
-    //     response: {
-    //       planetsInSystem: {selected: {color: 'orange'}}
+    //       metallicity_distribution: {}
     //     }
     //   },
     // ])
@@ -852,7 +834,7 @@ export default function() {
     }
   }
   document.getElementById('start-button').onclick = () => {
-    window.scrollTo(0, 570)
+    //window.scrollTo(0, 570)
     try {
       app.start();
     }

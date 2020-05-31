@@ -1,5 +1,6 @@
 .vscode/settings.json
-node_modules
+node_modules/*
+!node_modules/p4.js/src/vis/visualize.js
 .idea/Bachelor_project.iml
 .idea/misc.xml
 .idea/workspace.xml

@@ -1,7 +1,7 @@
 <html>
 <head>
   <style>
-    .grid-container {
+    .grid-attribute-sliders {
       display: grid;
       grid-template: none / auto auto auto auto; /* syntax: size of first row / # of columns defined by how many arguments here */
       grid-gap: 30px; /* gap between grid elements */
@@ -9,13 +9,29 @@
       padding: 30px; /* outer padding of container */
     }
     
-    .grid-container > div {
+    .grid-attribute-sliders > div {
+      background-color: rgba(255, 255, 255, 0.8); /* color of the grid elements */
+      text-align: left;
+      padding: 20px 0;
+      font-size: 16px;
+    }
+
+    .resolution-slider {
+      display: grid;
+      grid-template: none / auto; /* syntax: size of first row / # of columns defined by how many arguments here */
+      grid-gap: 30px; /* gap between grid elements */
+      background-color: rgb(255, 255, 255); /* container background */
+      padding: 0px 800px; /* outer padding of container */
+    }
+
+    .resolution-slider > div {
       background-color: rgba(255, 255, 255, 0.8); /* color of the grid elements */
       text-align: left;
       padding: 20px 0;
       font-size: 16px;
     }
   </style>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <meta charset="utf-8">
   <title>Kepler PVA</title>
 </head>
@@ -34,13 +50,14 @@
   <!-- Initialized by a script, to not keep file information in memory -->
   <div id="p5-control" style="text-align:center; font-family: sans-serif;"></div>
   
-  <div class="grid-container" style="font-family: sans-serif;">
+  <div class="grid-attribute-sliders" style="font-family: sans-serif;">
     <div>
       <p>
-      <label for="ra_range" style="font-size: 14px;">Right Ascension (deg):</label>
-      <input type="text" id="ra_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+        <label for="ra_range" style="font-size: 14px;">Right Ascension (deg):</label>
+        <input type="text" id="ra_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
       </p>
-    <div id="ra-slider-range" style="width: auto;"></div></div>
+      <div id="ra-slider-range" style="width: auto;"></div>
+    </div>
     
     <div>
       <p>
@@ -132,7 +149,7 @@
     
   </div>
   
-  <div style="text-align: center; font-family: sans-serif;">Select your estimated computer specs (Affects batch size): 
+  <div style="text-align: center; font-family: sans-serif; padding: 0px 550px;">Select your estimated computer specs (Affects batch size): 
     <fieldset id="GPU-settings">
       <label for="lowGPU">Low (Weak GPU)</label>
       <input type="radio" name="radio-1" id="lowGPU" checked>
@@ -143,6 +160,16 @@
       <label for="ultraGPU">Ultra (Extreme GPU)</label>
       <input type="radio" name="radio-1" id="ultraGPU">
     </fieldset>
+  </div>
+  
+  <div class="resolution-slider" style="font-family: sans-serif; width: 450px; margin: auto;">
+    <div>
+      <p>
+        <label for="resolution_slider_value" style="font-size: 14px;">Overall heatmap resolution:</label>
+        <input type="text" id="resolution_slider_value" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="resolution_slider" style="width: 300px; "></div>
+    </div>
   </div>
   
 
@@ -163,7 +190,7 @@
       DATA PROCESSED: 0 %
      </span>
   </div>
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
