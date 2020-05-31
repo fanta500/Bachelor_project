@@ -697,8 +697,8 @@ export default function() {
         visualize: {
           id: 'temp_distribution',
           in: "temp_distribution",
-          mark: 'spline',
-          color: 'teal',
+          mark: 'area',
+          color: 'steelblue',
           x: 'teff',
           y: 'temp_count',
 
@@ -708,8 +708,8 @@ export default function() {
         visualize: {
           id: 'mag_distribution',
           in: "mag_distribution",
-          mark: 'spline',
-          color: 'teal',
+          mark: 'area',
+          color: 'steelblue',
           x: 'kepmag', 
           y: 'mag_count'
         }
@@ -718,8 +718,8 @@ export default function() {
         visualize: {
           id: 'mass_distribution',
           in: "mass_distribution",
-          mark: 'spline',
-          color: 'teal',
+          mark: 'area',
+          color: 'steelblue',
           x: 'mass', 
           y: 'mass_count'
         }
@@ -728,8 +728,8 @@ export default function() {
         visualize: {
           id: 'radius_distribution',
           in: "radius_distribution",
-          mark: 'spline',
-          color: 'teal',
+          mark: 'area',
+          color: 'steelblue',
           x: 'radius',
           y: 'radius_count'
         }
@@ -777,8 +777,8 @@ export default function() {
         visualize: {
           id: 'gravity_distribution',
           in: "gravity_distribution",
-          mark: 'spline',
-          color: 'teal',
+          mark: 'area',
+          color: 'steelblue',
           x: 'logg', 
           y: 'gravity_count'
         }
@@ -787,8 +787,8 @@ export default function() {
         visualize: {
           id: 'density_distribution',
           in: "density_distribution",
-          mark: 'spline',
-          color: 'teal',
+          mark: 'area',
+          color: 'steelblue',
           x: 'dens', 
           y: 'density_count'
         }
@@ -798,21 +798,21 @@ export default function() {
           id: 'metallicity_distribution',
           in: "metallicity_distribution",
           mark: 'spline',
-          color: 'teal',
+          color: 'steelblue',
           x: 'feh', 
           y: 'metallicity_count'
         }
       },
     ])
-    // .interact([
-    //   {
-    //     event: ['pan','zoom'], 
-    //     from: 'temp_distribution', 
-    //     response: {
-    //       metallicity_distribution: {}
-    //     }
-    //   },
-    // ])
+    .interact([
+      {
+        event: 'brush', 
+        from: 'coordinate_map', 
+        response: {
+          planetsInSystem: {selected: {color: 'steelblue'}}
+        }
+      },
+    ])
     .onEach(function() {
       let progress = (((n * batchSize) / datasetSize) * 100)
       progress = (progress > 100 ? progress = 100 : progress = progress)
@@ -834,7 +834,6 @@ export default function() {
     }
   }
   document.getElementById('start-button').onclick = () => {
-    //window.scrollTo(0, 570)
     try {
       app.start();
     }
