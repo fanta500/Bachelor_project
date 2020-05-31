@@ -804,15 +804,15 @@ export default function() {
         }
       },
     ])
-    .interact([
-      {
-        event: 'brush', 
-        from: 'coordinate_map', 
-        response: {
-          planetsInSystem: {selected: {color: 'steelblue'}}
-        }
-      },
-    ])
+    // .interact([
+    //   {
+    //     event: 'brush', 
+    //     from: 'coordinate_map', 
+    //     response: {
+    //       planetsInSystem: {selected: {color: 'steelblue'}}
+    //     }
+    //   },
+    // ])
     .onEach(function() {
       let progress = (((n * batchSize) / datasetSize) * 100)
       progress = (progress > 100 ? progress = 100 : progress = progress)
