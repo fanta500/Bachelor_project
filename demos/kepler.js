@@ -325,7 +325,7 @@ export default function() {
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 455, height: 455,
         xAxis: {
-          ticks: 5,
+          ticks: 6,
         },
         gridlines: {y: true}
       },
@@ -334,7 +334,7 @@ export default function() {
         padding: {left: 80, right: 10, top: 10, bottom: 60},
         width: 455, height: 455,
         xAxis: {
-          ticks: 5,
+          ticks: 10,
         },
         gridlines: {y: true}
       },
