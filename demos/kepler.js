@@ -2,6 +2,10 @@ import pv from '..';
 import makeSliders from './sliders'
 
 export default function() {
+  //benchmarking stuff
+  let timeBegin;
+  let timeEnd;
+
   //initialize the sliders to control various attributes
   makeSliders()
 
@@ -818,9 +822,15 @@ export default function() {
       progress = (progress > 100 ? progress = 100 : progress = progress)
       document.getElementById('stats').innerHTML = 'DATA PROCESSED: ' + progress.toFixed(2) + ' %';
       n += 1
-      // if (progress === 100) {
-      //   enableButtonsAndSliders()
-      // }
+      if (progress === 100) {
+        timeEnd = new Date().getTime()
+        let elapsedTime = (timeEnd-timeBegin)/1000
+        let frames = n-1
+        console.log("Visualisation ended at: ", timeEnd)
+        console.log("Visualisation took ", elapsedTime, " seconds")
+        console.log("Visualisation rendered ", frames, " frames.")
+        console.log("Visualisation averaged ", frames/elapsedTime, " FPS")
+      }
     })
   }
     
@@ -835,6 +845,8 @@ export default function() {
   }
   document.getElementById('start-button').onclick = () => {
     try {
+      timeBegin = new Date().getTime()
+      console.log("Visualisation started at: ", timeBegin)
       app.start();
     }
     catch(e) {
