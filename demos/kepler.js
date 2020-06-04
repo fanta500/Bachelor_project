@@ -538,7 +538,7 @@ export default function() {
           ntce: TCEs_range
         },
         aggregate: {
-          $bin: {radius: Math.ceil(150*calculateBinSizeFactor("radius"))},
+          $bin: {radius: Math.ceil(500*calculateBinSizeFactor("radius"))},
           $collect: {
             radius_count: {$count: 'radius'},
           },
