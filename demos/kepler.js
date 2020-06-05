@@ -213,8 +213,6 @@ export default function() {
     //don't allow pressing of start until parameters are confirmed
     document.getElementById("start-button").disabled = false
     document.getElementById("next-button").disabled = false
-
-
   }
 
   function enableButtonsAndSliders() {
