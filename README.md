@@ -1,5 +1,5 @@
 # Bachelor_project
-This repository is a derivation of the P5, copyright 2020 Kelvin Li: https://github.com/jpkli/pv
+This repository is a derivation of P5, copyright 2020 Kelvin Li: https://github.com/jpkli/pv
 
 We will be making progressive visualisations of MAST data from the Kepler Space Mission. Akin to a sky map.
 
