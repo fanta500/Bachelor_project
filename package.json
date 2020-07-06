@@ -1,7 +1,7 @@
 {
-  "name": "pv",
-  "version": "0.2.2",
-  "description": "Progressive and portable parallel processing pipelines. ",
+  "name": "keplervis",
+  "version": "1.0.0",
+  "description": "Progressive visualisation of Kepler Space Telescope data. ",
   "main": "index.js",
   "directories": {
     "example": "example"
@@ -12,7 +12,7 @@
     "server": "webpack --watch --config build/webpack.node.config.js",
     "start": "npm run dev"
   },
-  "author": "Kelvin Li",
+  "author": "Alexander Schacht & Jonathan Berger",
   "license": "BSD-3-Clause",
   "devDependencies": {
     "babel-core": "^6.22.1",
